@@ -22,7 +22,11 @@ interface Props {
  * the ON AIR pill to flip the dev off-air failsafe.
  */
 export function VinylHero({ state, track, size, profile, tint }: Props) {
-  const spin = useRef(new Animated.Value(0)).current;
+  // Accumulating rotation (degrees) so we can spin up / coast like a real
+  // platter rather than snapping between stopped and full speed.
+  const rotation = useRef(new Animated.Value(0)).current;
+  const accumDeg = useRef(0);
+  const loopToken = useRef(0);
   const drop = useRef(new Animated.Value(1)).current;
   const [booed, setBooed] = useState<Track | null>(null);
 
@@ -36,16 +40,61 @@ export function VinylHero({ state, track, size, profile, tint }: Props) {
   );
 
   useEffect(() => {
-    const loop = Animated.loop(
-      Animated.timing(spin, {
-        toValue: 1,
-        duration: motion.rpm33, // ≈33⅓ rpm
+    const myToken = ++loopToken.current;
+
+    // Steady 33⅓ rpm, one linear turn at a time (seamless: 360°≡0°).
+    const continuous = () => {
+      if (loopToken.current !== myToken) return;
+      const start = accumDeg.current;
+      Animated.timing(rotation, {
+        toValue: start + 360,
+        duration: motion.rpm33,
         easing: Easing.linear,
         useNativeDriver: true,
-      }),
-    );
-    if (state.isPlaying) loop.start();
-    return () => loop.stop();
+      }).start(({ finished }) => {
+        if (finished && loopToken.current === myToken) {
+          accumDeg.current = start + 360;
+          continuous();
+        }
+      });
+    };
+
+    if (state.isPlaying) {
+      // Spin-up: accelerate from rest into the groove.
+      const start = accumDeg.current;
+      Animated.timing(rotation, {
+        toValue: start + 200,
+        duration: 1100,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (finished && loopToken.current === myToken) {
+          accumDeg.current = start + 200;
+          continuous();
+        }
+      });
+    } else {
+      // Coast to a stop — momentum bleeding off.
+      rotation.stopAnimation((val) => {
+        accumDeg.current = val;
+        if (loopToken.current !== myToken) return;
+        Animated.timing(rotation, {
+          toValue: val + 130,
+          duration: 1500,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }).start(({ finished }) => {
+          if (finished) accumDeg.current = val + 130;
+        });
+      });
+    }
+
+    return () => {
+      loopToken.current++;
+      rotation.stopAnimation((val) => {
+        accumDeg.current = val;
+      });
+    };
   }, [state.isPlaying]);
 
   // Needle drop: each new track lands with a spring.
@@ -54,8 +103,9 @@ export function VinylHero({ state, track, size, profile, tint }: Props) {
     Animated.spring(drop, { toValue: 1, speed: 14, bounciness: 8, useNativeDriver: true }).start();
   }, [state.currentTrackId, state.startedAtServerMs]);
 
-  const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+  const rotate = rotation.interpolate({ inputRange: [0, 360], outputRange: ['0deg', '360deg'] });
   const artSize = size * 0.62;
+  const initial = (track?.artist ?? track?.title ?? '♪').trim().charAt(0).toUpperCase() || '♪';
 
   return (
     <View style={styles.container}>
@@ -105,10 +155,37 @@ export function VinylHero({ state, track, size, profile, tint }: Props) {
               />
             ) : (
               <View style={[styles.artFallback, { width: artSize, height: artSize }]}>
-                <Text style={{ fontSize: artSize * 0.4 }}>💿</Text>
+                {/* off-center smear so the label's rotation is legible */}
+                <View
+                  style={[
+                    styles.labelSmear,
+                    {
+                      width: artSize * 0.5,
+                      height: artSize * 0.5,
+                      borderRadius: artSize * 0.25,
+                      top: artSize * 0.1,
+                      left: artSize * 0.12,
+                      backgroundColor: tint,
+                    },
+                  ]}
+                />
+                <Text style={[styles.labelChar, { fontSize: artSize * 0.34 }]}>{initial}</Text>
               </View>
             )}
           </View>
+          {/* glossy studio sheen — fixed to the disc, sweeps as it turns */}
+          <View
+            pointerEvents="none"
+            style={[
+              styles.sheen,
+              {
+                width: size * 1.1,
+                height: size * 0.34,
+                top: size * 0.12,
+                left: -size * 0.05,
+              },
+            ]}
+          />
           <View style={[styles.spindle, { borderColor: tint }]} />
         </Animated.View>
       </Animated.View>
@@ -147,6 +224,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: colors.vinylGroove,
+    overflow: 'hidden',
   },
   groove: {
     position: 'absolute',
@@ -158,6 +236,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgRaised,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  labelSmear: {
+    position: 'absolute',
+    opacity: 0.4,
+  },
+  labelChar: {
+    color: colors.text,
+    fontFamily: fonts.display,
+  },
+  sheen: {
+    position: 'absolute',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderRadius: 999,
+    transform: [{ rotate: '-24deg' }],
   },
   spindle: {
     position: 'absolute',

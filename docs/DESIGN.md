@@ -118,7 +118,7 @@ sheets, wells) — glass is for panels floating over the ambience.
 | Token | Spec | Use |
 | --- | --- | --- |
 | `pressScale` | spring → 0.95, back on release | every touchable (`PressableScale`) |
-| `rpm33` | 1800ms linear ∞ | vinyl spin |
+| `rpm33` | 1800ms linear ∞ | vinyl spin — with **spin-up** (ease-in from rest on play) and **coast-to-stop** (ease-out on pause); a rotating gloss sheen + asymmetric label make the turn legible even on artwork-less tracks |
 | `needleDrop` | 0.94→1 spring + fade, ~400ms | track-change entrance |
 | `votePop` | spring 1→1.35→1 | 🔥/💩 press |
 | `onAirPulse` | 2s ease ∞ | ON AIR lamp |
