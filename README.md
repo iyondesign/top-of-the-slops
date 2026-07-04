@@ -113,6 +113,10 @@ AI-generated music and no AI claims. Phase 2 re-takes the word by making
 slop literal, on an all-Google AI stack (Vertex AI: Lyria, Gemini, Veo,
 Imagen, Chirp).
 
+For the full audit trail of every capability — what shipped, when, in which
+commit, and where it lives in the code — see
+[`CHANGELOG.md`](CHANGELOG.md).
+
 ## Development notes
 
 - `npx tsc --noEmit` typechecks the client; `npm run typecheck` inside

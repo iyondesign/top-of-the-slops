@@ -1,7 +1,9 @@
 # TOTS Architecture
 
 Condensed from the product plan (v2.1) and the M1/M2 fable spec. This file is
-the working map; the source documents win on any conflict.
+the working map; the source documents win on any conflict. For the dated
+capability audit trail (what shipped when, in which commit), see
+[`../CHANGELOG.md`](../CHANGELOG.md).
 
 ## The one constraint that shapes everything
 
