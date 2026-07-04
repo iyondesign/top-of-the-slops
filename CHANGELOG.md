@@ -11,6 +11,27 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.6.0] — 2026-07-04 — Brand: logo, Space type family, per-track lighting
+
+### Added
+- **The TOTS mark** — "the record wearing its spectrum": vinyl disc, ¾
+  spectrum ring (the live waveform), coral label (the signal), gap = the room.
+  Animated lockup in the top bar (lazy 8s spin), SVG source of truth, and
+  regenerated `assets/` app icon / splash icon / favicon rendered from it.
+  → `src/components/Logo.tsx`, `design-system/brand/`
+- **Real typography** — Space Grotesk (display: titles, wordmark, headers,
+  tabs, buttons) + Space Mono (telemetry) loaded via expo-font; utility text
+  stays on the native system stack. → theme `fonts`, applied across components
+- **Per-track lighting** — `useArtworkTint` extracts the dominant vibrant
+  color from the current artwork (web canvas sampling; coral fallback) and
+  re-lights the hero glow + spindle on every track change.
+  → `src/hooks/useArtworkTint.ts`
+
+### Versioning
+- Manifests bumped to `0.6.0`.
+
+---
+
 ## [0.5.0] — 2026-07-04 — Ambient artwork backdrop + frosted glass surfaces
 
 ### Added

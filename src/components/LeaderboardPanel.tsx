@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { subscribeLeaderboards } from '../channel/channelClient';
-import { colors, radius, space, type } from '../theme';
+import { colors, fonts, radius, space, type } from '../theme';
 import type { Leaderboards, UserProfile } from '../types';
 import { GlassPanel } from '../ui/GlassPanel';
 
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgSunken,
   },
   tabActive: { backgroundColor: colors.accentSoft },
-  tabText: { color: colors.textFaint, fontSize: type.caption, fontWeight: '700' },
+  tabText: { color: colors.textFaint, fontSize: type.caption, fontFamily: fonts.displayMedium },
   tabTextActive: { color: colors.accent },
   row: {
     flexDirection: 'row',

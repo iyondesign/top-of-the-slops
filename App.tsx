@@ -1,3 +1,9 @@
+import {
+  SpaceGrotesk_500Medium,
+  SpaceGrotesk_700Bold,
+} from '@expo-google-fonts/space-grotesk';
+import { SpaceMono_400Regular } from '@expo-google-fonts/space-mono';
+import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import {
@@ -13,15 +19,22 @@ import { attachPresence } from './src/channel/channelClient';
 import { AmbientBackdrop } from './src/components/AmbientBackdrop';
 import { ChatPanel } from './src/components/ChatPanel';
 import { LeaderboardPanel } from './src/components/LeaderboardPanel';
+import { Logo } from './src/components/Logo';
 import { OffAirCard } from './src/components/OffAirCard';
 import { ProfileEditor } from './src/components/ProfileEditor';
 import { VinylHero } from './src/components/VinylHero';
+import { useArtworkTint } from './src/hooks/useArtworkTint';
 import { useAppConfig, useChannelState, useCurrentTrack } from './src/hooks/useChannel';
 import { useIdentity } from './src/hooks/useIdentity';
 import { usePlayback } from './src/hooks/usePlayback';
 import { colors, DESKTOP_BREAKPOINT, fonts, radius, space, type } from './src/theme';
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    SpaceGrotesk_500Medium,
+    SpaceGrotesk_700Bold,
+    SpaceMono_400Regular,
+  });
   const { width } = useWindowDimensions();
   const isDesktop = width >= DESKTOP_BREAKPOINT;
 
@@ -30,6 +43,7 @@ export default function App() {
   const track = useCurrentTrack(state);
   const { profile, update } = useIdentity();
   const { enabled, enable } = usePlayback(state, config);
+  const tint = useArtworkTint(track?.artworkUrl);
 
   useEffect(() => {
     if (profile && !profile.uid.startsWith('local-')) attachPresence(profile.uid);
@@ -47,10 +61,15 @@ export default function App() {
       listeningEnabled={enabled}
       onTuneIn={enable}
       profile={profile}
+      tint={tint}
     />
   ) : (
     <Text style={styles.loading}>Warming up the decks…</Text>
   );
+
+  if (!fontsLoaded) {
+    return <View style={styles.canvas} />;
+  }
 
   return (
     <View style={styles.canvas}>
@@ -59,9 +78,7 @@ export default function App() {
         <StatusBar style="light" />
       <View style={styles.topBar}>
         <View style={styles.brand}>
-          <Text style={styles.wordmark}>
-            TOP OF THE <Text style={styles.wordmarkAccent}>SLOPS</Text>
-          </Text>
+          <Logo size={26} />
           <View style={styles.channelBug}>
             <Text style={styles.channelBugText}>TOTS•01</Text>
           </View>
@@ -107,14 +124,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     paddingVertical: space.md,
   },
-  brand: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  wordmark: {
-    color: colors.text,
-    fontSize: type.body,
-    fontWeight: '900',
-    letterSpacing: 2,
-  },
-  wordmarkAccent: { color: colors.accent },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: space.md - 4 },
   channelBug: {
     borderWidth: 1,
     borderColor: colors.border,

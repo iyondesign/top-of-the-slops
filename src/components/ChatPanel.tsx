@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: space.sm,
   },
-  title: { color: colors.text, fontSize: type.body, fontWeight: '700' },
+  title: { color: colors.text, fontSize: type.body, fontFamily: fonts.display },
   liveDotWrap: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.live },
   headerMeta: {

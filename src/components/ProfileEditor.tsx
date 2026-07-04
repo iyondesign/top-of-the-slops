@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 import { AVATARS } from '../identity/handles';
-import { colors, radius, space, type } from '../theme';
+import { colors, fonts, radius, space, type } from '../theme';
 import type { UserProfile } from '../types';
 
 interface Props {
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     padding: space.lg,
     gap: space.md,
   },
-  sheetTitle: { color: colors.text, fontSize: type.title, fontWeight: '800' },
+  sheetTitle: { color: colors.text, fontSize: type.title, fontFamily: fonts.display },
   sheetHint: { color: colors.textDim, fontSize: type.caption, lineHeight: 18 },
   input: {
     backgroundColor: colors.bgSunken,
@@ -149,5 +149,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: space.sm + 2,
   },
-  saveText: { color: '#FFFFFF', fontWeight: '800', fontSize: type.body },
+  saveText: { color: '#FFFFFF', fontFamily: fonts.display, fontSize: type.body },
 });

@@ -61,12 +61,20 @@ export const gradients = {
   slop: ['#8B5CF6', '#FF4FD8'] as const,
 } as const;
 
+/**
+ * Type voices (loaded in App via expo-font):
+ * - display: Space Grotesk — the brand voice: titles, wordmark, buttons,
+ *   panel headers. Distinctive without being decorative.
+ * - mono: Space Mono — its sibling; every live number (telemetry).
+ * - Utility/body text stays on the native system stack (SF on Apple
+ *   platforms) — the app speaks in Space, the OS handles the plumbing.
+ */
 export const fonts = {
-  /** Telemetry stack — every live number renders in this. */
+  display: 'SpaceGrotesk_700Bold',
+  displayMedium: 'SpaceGrotesk_500Medium',
   mono: Platform.select({
-    web: "'SF Mono', 'JetBrains Mono', ui-monospace, Menlo, monospace",
-    ios: 'Menlo',
-    default: 'monospace',
+    web: "SpaceMono_400Regular, 'SF Mono', ui-monospace, Menlo, monospace",
+    default: 'SpaceMono_400Regular',
   }) as string,
 } as const;
 

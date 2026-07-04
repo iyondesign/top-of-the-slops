@@ -1,0 +1,70 @@
+<!-- @dsCard group="Brand" name="Logo — the record wearing its spectrum" -->
+<style>
+:root{--bg:#0A0A0C;--raised:#131318;--border:rgba(255,255,255,.07);--text:#F7F7F8;--dim:#A0A0AA;--faint:#62626C;--accent:#FF4655;--mono:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:32px}
+h1{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:20px}
+.row{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.tile{background:var(--raised);border:1px solid var(--border);border-radius:24px;padding:24px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.tile span{font-family:var(--mono);font-size:10px;color:var(--faint)}
+.lockup{display:flex;align-items:center;gap:12px}
+.word{font-weight:800;letter-spacing:.1em;font-size:26px}
+.spin{animation:rpm 8s linear infinite}
+@keyframes rpm{to{transform:rotate(360deg)}}
+.note{margin-top:20px;padding:14px 16px;border:1px solid var(--border);border-radius:18px;background:var(--raised);color:var(--dim);font-size:12px;line-height:1.6;max-width:640px}
+.note b{color:var(--text)}
+</style>
+<h1>Brand — the record wearing its spectrum</h1>
+<div class="row">
+  <div class="tile" style="background:#0A0A0C">
+    <svg class="spin" width="120" height="120" viewBox="0 0 1024 1024">
+      <defs><linearGradient id="s1" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#3D8BFF"/><stop offset=".38" stop-color="#B265FF"/>
+        <stop offset=".7" stop-color="#FF4FD8"/><stop offset="1" stop-color="#FF7A3D"/>
+      </linearGradient></defs>
+      <circle cx="512" cy="512" r="380" fill="#0E0E12" stroke="rgba(255,255,255,.08)" stroke-width="6"/>
+      <circle cx="512" cy="512" r="300" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="4"/>
+      <circle cx="512" cy="512" r="245" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="4"/>
+      <circle cx="512" cy="512" r="380" fill="none" stroke="url(#s1)" stroke-width="52"
+              stroke-linecap="round" stroke-dasharray="1790 2388" transform="rotate(125 512 512)"/>
+      <circle cx="512" cy="512" r="150" fill="#FF4655"/>
+      <circle cx="512" cy="512" r="40" fill="#0A0A0C"/>
+    </svg>
+    <span>mark · spins at rest (8s)</span>
+  </div>
+  <div class="tile">
+    <div class="lockup">
+      <svg width="42" height="42" viewBox="0 0 1024 1024">
+        <defs><linearGradient id="s2" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0" stop-color="#3D8BFF"/><stop offset=".38" stop-color="#B265FF"/>
+          <stop offset=".7" stop-color="#FF4FD8"/><stop offset="1" stop-color="#FF7A3D"/>
+        </linearGradient></defs>
+        <circle cx="512" cy="512" r="380" fill="#0E0E12" stroke="rgba(255,255,255,.08)" stroke-width="6"/>
+        <circle cx="512" cy="512" r="380" fill="none" stroke="url(#s2)" stroke-width="52"
+                stroke-linecap="round" stroke-dasharray="1790 2388" transform="rotate(125 512 512)"/>
+        <circle cx="512" cy="512" r="150" fill="#FF4655"/>
+        <circle cx="512" cy="512" r="40" fill="#0A0A0C"/>
+      </svg>
+      <div class="word">TOTS</div>
+    </div>
+    <span>lockup · Space Grotesk Bold</span>
+  </div>
+  <div class="tile" style="padding:0;overflow:hidden;border-radius:28%">
+    <svg width="120" height="120" viewBox="0 0 1024 1024">
+      <defs><linearGradient id="s3" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="#3D8BFF"/><stop offset=".38" stop-color="#B265FF"/>
+        <stop offset=".7" stop-color="#FF4FD8"/><stop offset="1" stop-color="#FF7A3D"/>
+      </linearGradient></defs>
+      <rect width="1024" height="1024" fill="#0A0A0C"/>
+      <circle cx="512" cy="512" r="340" fill="#0E0E12" stroke="rgba(255,255,255,.08)" stroke-width="6"/>
+      <circle cx="512" cy="512" r="268" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="4"/>
+      <circle cx="512" cy="512" r="220" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="4"/>
+      <circle cx="512" cy="512" r="340" fill="none" stroke="url(#s3)" stroke-width="48"
+              stroke-linecap="round" stroke-dasharray="1600 2136" transform="rotate(125 512 512)"/>
+      <circle cx="512" cy="512" r="134" fill="#FF4655"/>
+      <circle cx="512" cy="512" r="36" fill="#0A0A0C"/>
+    </svg>
+    <span style="padding:8px">app icon</span>
+  </div>
+</div>
+<div class="note"><b>One glyph, whole product:</b> the record is the music, the ¾ spectrum ring is the live waveform/progress, the coral label is the signal (action + on-air), and the gap in the ring is the room — always waiting for the next vote. The ring opens at 10 o'clock (rotate 125°) so the gradient reads blue→orange clockwise, matching the waveform's played direction. Clear space = one label-radius around the mark; never recolor the ring; the mark spins only where the channel is live.</div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { devSetAppConfig } from '../channel/channelClient';
-import { colors, radius, space, type } from '../theme';
+import { colors, fonts, radius, space, type } from '../theme';
 
 /**
  * The isLive=false failsafe state (fable spec M1): a clean "off air" card
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   title: {
     color: colors.textDim,
     fontSize: type.hero,
-    fontWeight: '800',
+    fontFamily: fonts.display,
     letterSpacing: 6,
   },
   subtitle: {

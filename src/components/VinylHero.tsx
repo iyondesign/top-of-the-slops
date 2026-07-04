@@ -15,6 +15,8 @@ interface Props {
   listeningEnabled: boolean;
   onTuneIn: () => void;
   profile: UserProfile | null;
+  /** Dominant artwork color — re-lights the glow + spindle per track. */
+  tint: string;
 }
 
 /**
@@ -23,7 +25,7 @@ interface Props {
  * enter with the needle-drop (scale 0.94→1 spring + fade). Long-press
  * the ON AIR pill to flip the dev off-air failsafe.
  */
-export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, profile }: Props) {
+export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, profile, tint }: Props) {
   const spin = useRef(new Animated.Value(0)).current;
   const lamp = useRef(new Animated.Value(1)).current;
   const drop = useRef(new Animated.Value(1)).current;
@@ -99,7 +101,13 @@ export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, prof
         <View
           style={[
             styles.glow,
-            { width: size * 0.82, height: size * 0.82, borderRadius: (size * 0.82) / 2 },
+            {
+              width: size * 0.82,
+              height: size * 0.82,
+              borderRadius: (size * 0.82) / 2,
+              backgroundColor: tint,
+              shadowColor: tint,
+            },
           ]}
         />
         <Animated.View
@@ -130,7 +138,7 @@ export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, prof
               </View>
             )}
           </View>
-          <View style={styles.spindle} />
+          <View style={[styles.spindle, { borderColor: tint }]} />
         </Animated.View>
       </Animated.View>
 
@@ -271,12 +279,17 @@ const styles = StyleSheet.create({
   title: {
     color: colors.text,
     fontSize: type.hero,
-    fontWeight: '800',
+    fontFamily: fonts.display,
     textAlign: 'center',
     maxWidth: 480,
     letterSpacing: -0.6,
   },
-  artist: { color: colors.textDim, fontSize: type.title - 2, fontWeight: '600', textAlign: 'center' },
+  artist: {
+    color: colors.textDim,
+    fontSize: type.title - 2,
+    fontFamily: fonts.displayMedium,
+    textAlign: 'center',
+  },
   timecodeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -313,5 +326,5 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     shadowOffset: { width: 0, height: 0 },
   },
-  tuneInText: { color: '#FFFFFF', fontWeight: '800', fontSize: type.body },
+  tuneInText: { color: '#FFFFFF', fontFamily: fonts.display, fontSize: type.body },
 });

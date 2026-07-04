@@ -66,16 +66,22 @@ artwork halo), never black drop-shadows.
 
 ### Type
 
-| Role | Spec | Use |
-| --- | --- | --- |
-| Display | 800, sentence case, tracking −2%, leading 1.02 | track titles |
-| Prompt | 300, 26px, dim | empty states, onboarding questions |
-| Title | 700 | panel headers, artist |
-| Body | 400/600, 15px | chat, copy |
-| Caption | 600, 12px | handles, meta |
-| Telemetry | mono, 11px, uppercase, +8%, `telemetry` gray | timecode, counts, channel bug |
+Three voices, loaded via expo-font (`fonts` in theme.ts):
 
-No all-caps display type in v2 — caps are reserved for telemetry.
+| Voice | Face | Use |
+| --- | --- | --- |
+| Display | **Space Grotesk** Bold / Medium | track titles, wordmark, panel headers, tabs, buttons — the brand speaks |
+| Telemetry | **Space Mono** | every live number: timecode, counts, channel bug — the siblings share one story |
+| Utility | native system stack (SF on Apple) | chat, body copy, meta — the OS handles the plumbing |
+
+| Role | Spec |
+| --- | --- |
+| Display | Space Grotesk Bold, sentence case, tracking −2%, leading 1.02 |
+| Prompt | 300 weight system, 26px, dim — empty states, onboarding |
+| Body / caption | system 400/600 · 15px / 12px |
+| Telemetry | Space Mono, 11px, uppercase, +8% tracking, `telemetry` gray |
+
+No all-caps display type — caps are reserved for telemetry.
 
 ### Geometry
 
@@ -126,6 +132,22 @@ animating its own height while the channel plays. The **played portion is lit
 in spectrum color** (sampled per bar — collectively one gradient), the
 remainder sits at 10% white. It *is* the progress bar; the mono timecode
 reads underneath.
+
+## Brand
+
+**The mark: the record wearing its spectrum** (`design-system/brand/` — SVG
+source + rendered app icons in `assets/`). One glyph, whole product: the
+record is the music, the ¾ spectrum ring is the live waveform/progress, the
+coral label is the signal, and the gap in the ring is the room. Rules: never
+recolor the ring; clear space = one label-radius; the mark spins (8s, lazy)
+only where the channel is live (`src/components/Logo.tsx`). Lockup: mark +
+"TOTS" in Space Grotesk Bold; the full "Top of the Slops" name lives in copy,
+not chrome.
+
+**Per-track lighting:** `useArtworkTint` extracts the artwork's dominant
+vibrant color (canvas sampling on web; native lands with the M0 dev build)
+and re-lights the hero glow + spindle every track — the room belongs to
+whoever's playing. Falls back to coral when artwork is missing or gray.
 
 ## Voice
 
