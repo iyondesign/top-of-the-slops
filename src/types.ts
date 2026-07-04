@@ -23,6 +23,45 @@ export interface ChannelState {
   version: number;
   nextAdvanceAtMs: number;
   listenerCount: number;
+  liveFireCount: number;
+  liveSlopCount: number;
+}
+
+/** One play of one track on the channel — the unit votes attach to. */
+export function trackPlayId(state: Pick<ChannelState, 'currentTrackId' | 'startedAtServerMs'>): string {
+  return `${state.currentTrackId}@${state.startedAtServerMs}`;
+}
+
+export type VoteValue = 'fire' | 'slop';
+
+export interface ChatMessage {
+  id: string;
+  userId: string;
+  handle: string;
+  avatar: string;
+  text: string;
+  createdAtMs: number;
+}
+
+export interface TrackBoardEntry {
+  track: Track;
+  fire: number;
+  slop: number;
+  net: number;
+  playedAtMs: number;
+  booedOff: boolean;
+}
+
+export interface TastemakerEntry {
+  userId: string;
+  handle: string;
+  avatar: string;
+  score: number;
+}
+
+export interface Leaderboards {
+  tracks: TrackBoardEntry[];
+  tastemakers: TastemakerEntry[];
 }
 
 /** Mirrors /app/config — global kill switches (plan §13.4). */

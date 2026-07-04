@@ -1,0 +1,41 @@
+rules_version = '2';
+
+// Day-one posture (fable spec): clients may read channel-adjacent data
+// and write ONLY their own /users/{uid}, messages, and votes. The
+// channel timeline lives in RTDB and is written only by the conductor's
+// Admin SDK (which bypasses these rules by design).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /users/{uid} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.handle is string
+        && request.resource.data.handle.size() >= 3
+        && request.resource.data.handle.size() <= 24;
+      allow delete: if false;
+    }
+
+    match /channels/global/messages/{messageId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 280;
+      allow update, delete: if false;
+    }
+
+    // Deterministic id "<trackPlayId>:<uid>" + create-only = one vote
+    // per user per track-play, enforced at the rules layer.
+    match /votes/{voteId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && voteId == request.resource.data.trackPlayId + ':' + request.auth.uid
+        && request.resource.data.value in ['fire', 'slop'];
+      allow update, delete: if false;
+    }
+  }
+}

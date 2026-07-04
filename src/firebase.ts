@@ -16,6 +16,15 @@ export interface FirebaseHandles {
 
 let cached: Promise<FirebaseHandles | null> | null = null;
 
+/** Synchronous check used to pick transports at module init. */
+export function isFirebaseConfigured(): boolean {
+  return Boolean(
+    process.env.EXPO_PUBLIC_FIREBASE_API_KEY &&
+      process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID &&
+      process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+  );
+}
+
 export function getFirebase(): Promise<FirebaseHandles | null> {
   cached ??= init();
   return cached;

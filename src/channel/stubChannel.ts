@@ -1,54 +1,64 @@
-import type { AppConfig, ChannelState, Track } from '../types';
+import type {
+  AppConfig,
+  ChannelState,
+  Leaderboards,
+  TastemakerEntry,
+  Track,
+  TrackBoardEntry,
+  VoteValue,
+} from '../types';
+import { trackPlayId } from '../types';
 
 /**
- * M1 stub conductor (carried from M0): a client-local loop that advances a
- * curated pool and emits ChannelState in exactly the shape the real M2
- * Cloud Run conductor will write to RTDB. The UI subscribes through
- * channelClient and never knows the difference — M2 swaps the transport,
- * not the contract.
+ * Stub conductor: a client-local loop that advances a curated pool and
+ * emits ChannelState in exactly the shape the real M2 Cloud Run conductor
+ * writes to RTDB (see server/conductor). The UI subscribes through
+ * channelClient and never knows the difference.
  *
- * Deliberate M2 parallels: round-robin pickNext with a cooldown, version
- * increments on every advance, nextAdvanceAtMs scheduling. Deliberate
- * omissions: no server clock (local Date.now stands in for
- * /.info/serverTimeOffset), no transaction guard (single writer here).
+ * It also carries the M4 crowd loop locally — votes, boo-to-skip,
+ * hype-to-replay, cooldowns, and both leaderboards — plus a simulated
+ * crowd so the room feels populated in dev (plan §9: the room must feel
+ * alive at 3am). Everything simulated is confined to this file; the
+ * facades (channelClient, voteClient) present the same API the Firebase
+ * transports implement.
  */
 
 /** Previews are 30s clips, so the stub rotates on a 30s boundary. */
 const STUB_TRACK_DURATION_MS = 30_000;
 const POOL_SEARCH_TERMS = ['synthwave', 'hyperpop', 'disco'];
 
+/** M4 guardrails (admin-set in /channels/global/meta once live). */
+const BOO_MIN_VOTES = 6;
+const BOO_LISTENER_FRACTION = 0.4;
+const HYPE_REPLAY_NET = 8;
+const REPLAY_COOLDOWN_PLAYS = 3;
+
 /** Offline fallback so the hero never dead-screens without network. */
 const FALLBACK_POOL: Track[] = [
-  {
-    id: 'stub-1',
-    title: 'Midnight Static',
-    artist: 'The Slop Machines',
-    artworkUrl: '',
-    previewUrl: null,
-    durationMs: STUB_TRACK_DURATION_MS,
-    source: 'apple',
-  },
-  {
-    id: 'stub-2',
-    title: 'Banger Protocol',
-    artist: 'VJAI & The Countdown',
-    artworkUrl: '',
-    previewUrl: null,
-    durationMs: STUB_TRACK_DURATION_MS,
-    source: 'apple',
-  },
-  {
-    id: 'stub-3',
-    title: 'Certified Vinyl',
-    artist: 'Tastemaker Court',
-    artworkUrl: '',
-    previewUrl: null,
-    durationMs: STUB_TRACK_DURATION_MS,
-    source: 'apple',
-  },
+  { id: 'stub-1', title: 'Midnight Static', artist: 'The Slop Machines', artworkUrl: '', previewUrl: null, durationMs: STUB_TRACK_DURATION_MS, source: 'apple' },
+  { id: 'stub-2', title: 'Banger Protocol', artist: 'VJAI & The Countdown', artworkUrl: '', previewUrl: null, durationMs: STUB_TRACK_DURATION_MS, source: 'apple' },
+  { id: 'stub-3', title: 'Certified Vinyl', artist: 'Tastemaker Court', artworkUrl: '', previewUrl: null, durationMs: STUB_TRACK_DURATION_MS, source: 'apple' },
+];
+
+const CROWD = [
+  { userId: 'sim-1', handle: 'neon-needle-07', avatar: '👾' },
+  { userId: 'sim-2', handle: 'velvet-woofer-42', avatar: '🕺' },
+  { userId: 'sim-3', handle: 'glitchy-encore-88', avatar: '📼' },
+  { userId: 'sim-4', handle: 'cosmic-fader-19', avatar: '🛸' },
+  { userId: 'sim-5', handle: 'crispy-chorus-55', avatar: '🌈' },
 ];
 
 type Listener<T> = (value: T) => void;
+
+interface PlayRecord {
+  track: Track;
+  startedAtMs: number;
+  fire: number;
+  slop: number;
+  booedOff: boolean;
+  /** uid -> {value, early} — early = cast in the first third of the play. */
+  votes: Map<string, { value: VoteValue; early: boolean }>;
+}
 
 export class StubChannel {
   private pool: Track[] = FALLBACK_POOL;
@@ -56,12 +66,18 @@ export class StubChannel {
   private state: ChannelState | null = null;
   private config: AppConfig = { isLive: true, chatEnabled: true };
 
+  private currentPlay: PlayRecord | null = null;
+  private history: PlayRecord[] = [];
+  private tastemakerScores = new Map<string, TastemakerEntry>();
+
   private stateListeners = new Set<Listener<ChannelState>>();
   private configListeners = new Set<Listener<AppConfig>>();
   private trackListeners = new Set<Listener<Track[]>>();
+  private boardListeners = new Set<Listener<Leaderboards>>();
+  private skipListeners = new Set<Listener<Track>>();
 
   private advanceTimer: ReturnType<typeof setTimeout> | null = null;
-  private listenerDriftTimer: ReturnType<typeof setInterval> | null = null;
+  private ambientTimer: ReturnType<typeof setInterval> | null = null;
   private started = false;
 
   start(): void {
@@ -69,19 +85,19 @@ export class StubChannel {
     this.started = true;
     void this.hydratePool().then(() => {
       this.advance();
-      // Ambient liveliness (plan §9): a stubbed listener count that
-      // wanders gently so the room reads as populated. Replaced by real
-      // presence in M2.
-      this.listenerDriftTimer = setInterval(() => this.driftListeners(), 5_000);
+      // Ambient liveliness (plan §9): listener drift + simulated crowd
+      // votes so tallies and boards move in dev. Replaced by real
+      // presence + real votes once Firebase is configured.
+      this.ambientTimer = setInterval(() => this.ambientTick(), 4_000);
     });
   }
 
   stop(): void {
     this.started = false;
     if (this.advanceTimer) clearTimeout(this.advanceTimer);
-    if (this.listenerDriftTimer) clearInterval(this.listenerDriftTimer);
+    if (this.ambientTimer) clearInterval(this.ambientTimer);
     this.advanceTimer = null;
-    this.listenerDriftTimer = null;
+    this.ambientTimer = null;
   }
 
   getTracks(): Track[] {
@@ -104,6 +120,47 @@ export class StubChannel {
     this.trackListeners.add(listener);
     listener(this.pool);
     return () => this.trackListeners.delete(listener);
+  }
+
+  onLeaderboards(listener: Listener<Leaderboards>): () => void {
+    this.boardListeners.add(listener);
+    listener(this.leaderboards());
+    return () => this.boardListeners.delete(listener);
+  }
+
+  /** Fires when a track gets booed off (for the "skipped" banner). */
+  onBooedOff(listener: Listener<Track>): () => void {
+    this.skipListeners.add(listener);
+    return () => this.skipListeners.delete(listener);
+  }
+
+  /**
+   * One vote per user per track-play (plan §8.5). Returns false if this
+   * uid already voted on the current play.
+   */
+  castVote(userId: string, handle: string, avatar: string, value: VoteValue): boolean {
+    if (!this.currentPlay || !this.state) return false;
+    if (this.currentPlay.votes.has(userId)) return false;
+    const elapsed = Date.now() - this.currentPlay.startedAtMs;
+    const early = elapsed < this.currentPlay.track.durationMs / 3;
+    this.currentPlay.votes.set(userId, { value, early });
+    if (value === 'fire') this.currentPlay.fire += 1;
+    else this.currentPlay.slop += 1;
+    if (!this.tastemakerScores.has(userId)) {
+      this.tastemakerScores.set(userId, { userId, handle, avatar, score: 0 });
+    }
+    this.state = {
+      ...this.state,
+      liveFireCount: this.currentPlay.fire,
+      liveSlopCount: this.currentPlay.slop,
+    };
+    this.emitState();
+    this.checkBooToSkip();
+    return true;
+  }
+
+  getUserVote(userId: string): VoteValue | null {
+    return this.currentPlay?.votes.get(userId)?.value ?? null;
   }
 
   /** Dev-only failsafe toggle, until /app/config lives in Firebase. */
@@ -150,12 +207,38 @@ export class StubChannel {
     }
   }
 
-  /** Round-robin pickNext — cooldown is implicit in strict rotation. */
-  private advance(): void {
-    if (!this.config.isLive || this.pool.length === 0) return;
+  /**
+   * pickNext with the M4 crowd influence wired locally: mostly rotation
+   * (cooldown implicit), but a heavily-🔥'd recent track can jump the
+   * queue — hype-to-replay, within the replay-cooldown guardrail.
+   */
+  private pickNext(): Track {
+    const recentIds = this.history.slice(-REPLAY_COOLDOWN_PLAYS).map((p) => p.track.id);
+    const hyped = this.history.filter(
+      (p) => p.fire - p.slop >= HYPE_REPLAY_NET && !recentIds.includes(p.track.id),
+    );
+    if (hyped.length > 0 && Math.random() < 0.3) {
+      const winner = hyped[hyped.length - 1];
+      return winner.track;
+    }
     this.poolIndex = (this.poolIndex + 1) % this.pool.length;
-    const track = this.pool[this.poolIndex];
+    return this.pool[this.poolIndex];
+  }
+
+  private advance(early = false): void {
+    if (!this.config.isLive || this.pool.length === 0) return;
+    this.closeCurrentPlay(early);
+
+    const track = this.pickNext();
     const now = Date.now();
+    this.currentPlay = {
+      track,
+      startedAtMs: now,
+      fire: 0,
+      slop: 0,
+      booedOff: false,
+      votes: new Map(),
+    };
     this.state = {
       currentTrackId: track.id,
       startedAtServerMs: now,
@@ -164,18 +247,106 @@ export class StubChannel {
       version: (this.state?.version ?? 0) + 1,
       nextAdvanceAtMs: now + track.durationMs,
       listenerCount: this.state?.listenerCount ?? 12 + Math.floor(Math.random() * 30),
+      liveFireCount: 0,
+      liveSlopCount: 0,
     };
     this.emitState();
     if (this.advanceTimer) clearTimeout(this.advanceTimer);
     this.advanceTimer = setTimeout(() => this.advance(), track.durationMs);
   }
 
-  private driftListeners(): void {
-    if (!this.state) return;
+  /** Boo-to-skip (plan §8.8): 💩 majority past threshold ends the play. */
+  private checkBooToSkip(): void {
+    if (!this.currentPlay || !this.state) return;
+    const threshold = Math.max(
+      BOO_MIN_VOTES,
+      Math.ceil(this.state.listenerCount * BOO_LISTENER_FRACTION),
+    );
+    if (
+      this.currentPlay.slop >= threshold &&
+      this.currentPlay.slop > this.currentPlay.fire
+    ) {
+      this.currentPlay.booedOff = true;
+      const track = this.currentPlay.track;
+      this.skipListeners.forEach((l) => l(track));
+      this.advance(true);
+    }
+  }
+
+  /** Finish the current play: archive it and settle tastemaker credit. */
+  private closeCurrentPlay(early: boolean): void {
+    const play = this.currentPlay;
+    if (!play) return;
+    this.currentPlay = null;
+    this.history.push(play);
+    if (this.history.length > 50) this.history.shift();
+
+    // Tastemaker scoring (plan §8.6): reward 🔥 votes on tracks that end
+    // net-positive — double credit for calling it in the first third.
+    const net = play.fire - play.slop;
+    for (const [userId, vote] of play.votes) {
+      const entry = this.tastemakerScores.get(userId);
+      if (!entry) continue;
+      if (vote.value === 'fire' && net > 0) entry.score += vote.early ? 10 : 4;
+      if (vote.value === 'slop' && (play.booedOff || net < 0)) entry.score += vote.early ? 6 : 2;
+    }
+    this.boardListeners.forEach((l) => l(this.leaderboards()));
+    void early;
+  }
+
+  private leaderboards(): Leaderboards {
+    const byTrack = new Map<string, TrackBoardEntry>();
+    for (const play of this.history) {
+      const existing = byTrack.get(play.track.id);
+      if (existing) {
+        existing.fire += play.fire;
+        existing.slop += play.slop;
+        existing.net = existing.fire - existing.slop;
+        existing.playedAtMs = Math.max(existing.playedAtMs, play.startedAtMs);
+        existing.booedOff = existing.booedOff || play.booedOff;
+      } else {
+        byTrack.set(play.track.id, {
+          track: play.track,
+          fire: play.fire,
+          slop: play.slop,
+          net: play.fire - play.slop,
+          playedAtMs: play.startedAtMs,
+          booedOff: play.booedOff,
+        });
+      }
+    }
+    const tracks = [...byTrack.values()].sort((a, b) => b.net - a.net).slice(0, 10);
+    const tastemakers = [...this.tastemakerScores.values()]
+      .filter((t) => t.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10);
+    return { tracks, tastemakers };
+  }
+
+  private ambientTick(): void {
+    if (!this.state || !this.currentPlay) return;
+
+    // Listener count wanders gently.
     const delta = Math.floor(Math.random() * 5) - 2;
-    const count = Math.max(3, this.state.listenerCount + delta);
-    if (count !== this.state.listenerCount) {
-      this.state = { ...this.state, listenerCount: count };
+    const listenerCount = Math.max(3, this.state.listenerCount + delta);
+
+    // A few simulated crowd votes per play, 🔥-leaning with occasional
+    // slop piles so boo-to-skip is observable in dev.
+    if (Math.random() < 0.7) {
+      const voter = CROWD[Math.floor(Math.random() * CROWD.length)];
+      if (!this.currentPlay.votes.has(voter.userId)) {
+        const slopStorm = Math.random() < 0.08;
+        this.castVote(
+          voter.userId,
+          voter.handle,
+          voter.avatar,
+          slopStorm || Math.random() < 0.3 ? 'slop' : 'fire',
+        );
+      }
+    }
+
+    if (this.state && listenerCount !== this.state.listenerCount) {
+      this.state = { ...this.state, listenerCount };
       this.emitState();
     }
   }
@@ -184,3 +355,8 @@ export class StubChannel {
     if (this.state) this.stateListeners.forEach((l) => l(this.state!));
   }
 }
+
+/** Shared singleton — channelClient, voteClient, and boards all use it. */
+export const stubChannel = new StubChannel();
+
+export { trackPlayId };

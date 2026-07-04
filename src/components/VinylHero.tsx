@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { devSetAppConfig, serverNow } from '../channel/channelClient';
+import { devSetAppConfig, serverNow, subscribeBooedOff } from '../channel/channelClient';
 import { colors, radius, space, type } from '../theme';
-import type { ChannelState, Track } from '../types';
+import type { ChannelState, Track, UserProfile } from '../types';
+import { VoteBar } from './VoteBar';
 
 interface Props {
   state: ChannelState;
@@ -11,6 +12,7 @@ interface Props {
   size: number;
   listeningEnabled: boolean;
   onTuneIn: () => void;
+  profile: UserProfile | null;
 }
 
 /**
@@ -18,8 +20,18 @@ interface Props {
  * spinning record, title/artist, LIVE badge, listener count, progress.
  * Long-press the LIVE pill to flip the dev off-air failsafe.
  */
-export function VinylHero({ state, track, size, listeningEnabled, onTuneIn }: Props) {
+export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, profile }: Props) {
   const spin = useRef(new Animated.Value(0)).current;
+  const [booed, setBooed] = useState<Track | null>(null);
+
+  useEffect(
+    () =>
+      subscribeBooedOff((t) => {
+        setBooed(t);
+        setTimeout(() => setBooed(null), 4_000);
+      }),
+    [],
+  );
 
   useEffect(() => {
     const loop = Animated.loop(
@@ -93,6 +105,16 @@ export function VinylHero({ state, track, size, listeningEnabled, onTuneIn }: Pr
       </Text>
 
       <ProgressBar state={state} width={size} />
+
+      <VoteBar state={state} profile={profile} />
+
+      {booed && (
+        <View style={styles.booedBanner}>
+          <Text style={styles.booedText}>
+            💩 “{booed.title}” was booed off the channel!
+          </Text>
+        </View>
+      )}
 
       {!listeningEnabled && (
         <Pressable style={styles.tuneIn} onPress={onTuneIn}>
@@ -191,6 +213,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   progressFill: { height: 4, backgroundColor: colors.accent },
+  booedBanner: {
+    backgroundColor: 'rgba(139, 92, 246, 0.18)',
+    borderColor: colors.slop,
+    borderWidth: 1,
+    borderRadius: radius.full,
+    paddingHorizontal: space.md,
+    paddingVertical: 6,
+  },
+  booedText: { color: colors.slop, fontSize: type.caption, fontWeight: '700' },
   tuneIn: {
     backgroundColor: colors.accent,
     paddingHorizontal: space.lg,

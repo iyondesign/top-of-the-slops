@@ -1,0 +1,24 @@
+{
+  "name": "tots-conductor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TOTS channel conductor — singleton Cloud Run service that owns /channels/global/state",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.0",
+    "@types/node": "^22.0.0"
+  }
+}

@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -9,9 +9,11 @@ import {
   View,
 } from 'react-native';
 
+import { attachPresence } from './src/channel/channelClient';
+import { ChatPanel } from './src/components/ChatPanel';
+import { LeaderboardPanel } from './src/components/LeaderboardPanel';
 import { OffAirCard } from './src/components/OffAirCard';
 import { ProfileEditor } from './src/components/ProfileEditor';
-import { SideRail } from './src/components/SideRail';
 import { VinylHero } from './src/components/VinylHero';
 import { useAppConfig, useChannelState, useCurrentTrack } from './src/hooks/useChannel';
 import { useIdentity } from './src/hooks/useIdentity';
@@ -28,7 +30,11 @@ export default function App() {
   const { profile, update } = useIdentity();
   const { enabled, enable } = usePlayback(state, config);
 
-  const heroSize = Math.min(isDesktop ? 380 : width - space.xl * 2, 420);
+  useEffect(() => {
+    if (profile && !profile.uid.startsWith('local-')) attachPresence(profile.uid);
+  }, [profile?.uid]);
+
+  const heroSize = Math.min(isDesktop ? 360 : width - space.xl * 2, 400);
 
   const hero = !config.isLive ? (
     <OffAirCard size={heroSize} />
@@ -39,26 +45,10 @@ export default function App() {
       size={heroSize}
       listeningEnabled={enabled}
       onTuneIn={enable}
+      profile={profile}
     />
   ) : (
     <Text style={styles.loading}>Warming up the decks…</Text>
-  );
-
-  const chatRail = (
-    <SideRail
-      title="Chat"
-      milestone="M3"
-      emoji="💬"
-      blurb={'The room opens here soon.\nDiscord-style, live, moderated.'}
-    />
-  );
-  const boardRail = (
-    <SideRail
-      title="Leaderboards"
-      milestone="M4"
-      emoji="🔥"
-      blurb={'🔥 vs 💩 — top tracks and the\ntastemakers who called them first.'}
-    />
   );
 
   return (
@@ -73,16 +63,24 @@ export default function App() {
 
       {isDesktop ? (
         <View style={styles.desktopBody}>
-          <View style={styles.rail}>{chatRail}</View>
+          <View style={styles.rail}>
+            <ChatPanel profile={profile} config={config} />
+          </View>
           <View style={styles.heroColumn}>{hero}</View>
-          <View style={styles.rail}>{boardRail}</View>
+          <View style={styles.rail}>
+            <LeaderboardPanel profile={profile} />
+          </View>
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.mobileBody}>
           {hero}
           <View style={styles.mobilePanels}>
-            {chatRail}
-            {boardRail}
+            <View style={styles.mobilePanel}>
+              <ChatPanel profile={profile} config={config} />
+            </View>
+            <View style={styles.mobilePanel}>
+              <LeaderboardPanel profile={profile} />
+            </View>
           </View>
         </ScrollView>
       )}
@@ -122,5 +120,6 @@ const styles = StyleSheet.create({
     paddingBottom: space.xl,
   },
   mobilePanels: { width: '100%', gap: space.md },
+  mobilePanel: { height: 320 },
   loading: { color: colors.textDim, fontSize: type.title },
 });
