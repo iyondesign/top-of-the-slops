@@ -1,0 +1,37 @@
+<!-- @dsCard group="Colors" name="Palette — Signal v2" -->
+<style>
+:root{--bg:#0A0A0C;--raised:#131318;--sunken:#050507;--border:rgba(255,255,255,.07);--text:#F7F7F8;--dim:#A0A0AA;--faint:#62626C;--accent:#FF4655;--fire:#FF7A3D;--slop:#B265FF;--tele:#9A9AA3;--mono:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:32px}
+h1{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.sw{border:1px solid var(--border);border-radius:18px;overflow:hidden;background:var(--raised)}
+.chip{height:64px}
+.meta{padding:10px 12px}
+.tok{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--text)}
+.hex{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:2px}
+.job{font-size:11px;color:var(--dim);margin-top:4px;line-height:1.35}
+.spectrum{margin-top:20px;border:1px solid var(--border);border-radius:18px;background:var(--raised);padding:16px}
+.spectrum .bar{height:14px;border-radius:7px;background:linear-gradient(90deg,#3D8BFF,#B265FF,#FF4FD8,#FF7A3D)}
+.spectrum p{font-size:11px;color:var(--dim);margin-top:10px;line-height:1.5}
+.rule{margin-top:16px;padding:14px 16px;border:1px solid var(--border);border-radius:18px;background:var(--raised);color:var(--dim);font-size:12px;line-height:1.5}
+.rule b{color:var(--text)}
+</style>
+<h1>Color · one voice per color</h1>
+<div class="grid">
+  <div class="sw"><div class="chip" style="background:#0A0A0C"></div><div class="meta"><div class="tok">bg</div><div class="hex">#0A0A0C</div><div class="job">canvas — neutral rich black, never #000</div></div></div>
+  <div class="sw"><div class="chip" style="background:#131318"></div><div class="meta"><div class="tok">bgRaised</div><div class="hex">#131318</div><div class="job">cards, rails</div></div></div>
+  <div class="sw"><div class="chip" style="background:#050507"></div><div class="meta"><div class="tok">bgSunken</div><div class="hex">#050507</div><div class="job">wells, inputs, vinyl label</div></div></div>
+  <div class="sw"><div class="chip" style="background:#F7F7F8"></div><div class="meta"><div class="tok">text</div><div class="hex">#F7F7F8</div><div class="job">primary ink</div></div></div>
+  <div class="sw"><div class="chip" style="background:#A0A0AA"></div><div class="meta"><div class="tok">textDim</div><div class="hex">#A0A0AA</div><div class="job">secondary</div></div></div>
+  <div class="sw"><div class="chip" style="background:#FF4655"></div><div class="meta"><div class="tok">accent / live</div><div class="hex">#FF4655</div><div class="job">THE signal: primary action + ON AIR</div></div></div>
+  <div class="sw"><div class="chip" style="background:#FF7A3D"></div><div class="meta"><div class="tok">fire</div><div class="hex">#FF7A3D</div><div class="job">🔥 banger side</div></div></div>
+  <div class="sw"><div class="chip" style="background:#B265FF"></div><div class="meta"><div class="tok">slop</div><div class="hex">#B265FF</div><div class="job">💩 slop side</div></div></div>
+  <div class="sw"><div class="chip" style="background:#9A9AA3"></div><div class="meta"><div class="tok">telemetry</div><div class="hex">#9A9AA3</div><div class="job">live readouts — quiet neutral mono</div></div></div>
+  <div class="sw"><div class="chip" style="background:linear-gradient(135deg,#0E0E12 60%,#202028)"></div><div class="meta"><div class="tok">vinyl / groove</div><div class="hex">#0E0E12 · #202028</div><div class="job">the record</div></div></div>
+</div>
+<div class="spectrum">
+  <div class="bar"></div>
+  <p><b style="color:var(--text)">The spectrum</b> — #3D8BFF → #B265FF → #FF4FD8 → #FF7A3D. Reserved exclusively for <b style="color:var(--text)">live music energy</b>: the waveform, the vote tug, generative art. Never a chrome color. This is the only place TOTS is allowed to be colorful — which is exactly why it reads premium.</p>
+</div>
+<div class="rule"><b>Rule:</b> coral acts + broadcasts, orange burns, violet boos, the spectrum sings, neutral mono reports. Elevation = signal glow (soft coral/artwork bloom), never black drop-shadows.</div>

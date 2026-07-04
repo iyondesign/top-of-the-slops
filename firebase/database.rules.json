@@ -1,0 +1,28 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "app": {
+      "config": { ".read": true }
+    },
+
+    "channels": {
+      "$channelId": {
+        "meta": { ".read": true },
+        "state": { ".read": true },
+        "leaderboards": { ".read": true }
+      }
+    },
+
+    "tracks": { ".read": true },
+
+    "presence": {
+      ".read": true,
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['online', 'lastSeen']) || newData.val() === null"
+      }
+    }
+  }
+}

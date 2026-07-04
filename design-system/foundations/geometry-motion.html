@@ -1,0 +1,44 @@
+<!-- @dsCard group="Foundations" name="Geometry, motion & the waveform" -->
+<style>
+:root{--bg:#0A0A0C;--raised:#131318;--sunken:#050507;--border:rgba(255,255,255,.07);--text:#F7F7F8;--dim:#A0A0AA;--faint:#62626C;--accent:#FF4655;--fire:#FF7A3D;--vinyl:#0E0E12;--groove:#202028;--mono:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:32px}
+h1{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:0 0 20px}
+h2{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin:28px 0 12px}
+.rads{display:flex;gap:16px;align-items:flex-end}
+.rad{background:var(--raised);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.motion{display:flex;gap:28px;align-items:center;flex-wrap:wrap}
+.demo{display:flex;flex-direction:column;align-items:center;gap:8px}
+.demo span{font-family:var(--mono);font-size:10px;color:var(--faint)}
+.disc{width:72px;height:72px;border-radius:50%;background:radial-gradient(circle at center,var(--accent) 0 22%,var(--vinyl) 23% 100%);border:1px solid var(--groove);animation:rpm33 1.8s linear infinite;box-shadow:0 0 40px rgba(255,70,85,.25)}
+@keyframes rpm33{to{transform:rotate(360deg)}}
+.lamp{width:14px;height:14px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite;box-shadow:0 0 16px rgba(255,70,85,.6)}
+@keyframes pulse{50%{opacity:.5}}
+.press{width:120px;height:40px;border-radius:999px;background:var(--accent);color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;animation:press 1.8s cubic-bezier(.2,.8,.2,1) infinite;box-shadow:0 0 26px rgba(255,70,85,.35)}
+@keyframes press{0%,60%,100%{transform:scale(1)}70%{transform:scale(.95)}80%{transform:scale(1.01)}}
+.wave{display:flex;align-items:center;gap:3px;height:34px;margin-top:4px}
+.wave i{display:block;width:4px;border-radius:2px;animation:eq 1s ease-in-out infinite}
+@keyframes eq{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+.card{margin-top:16px;background:var(--raised);border:1px solid var(--border);border-radius:24px;padding:16px;max-width:420px;box-shadow:inset 0 1px 0 rgba(247,247,248,.04)}
+.card p{font-size:12px;color:var(--dim);line-height:1.55}
+.card b{color:var(--text)}
+</style>
+<h1>Geometry &amp; motion</h1>
+<h2>Radii — pill 999 · card 24 · tile 12 · space 4·8·12·16·24·32·48</h2>
+<div class="rads">
+  <div class="rad" style="width:110px;height:40px;border-radius:999px">pill</div>
+  <div class="rad" style="width:90px;height:72px;border-radius:24px">card 24</div>
+  <div class="rad" style="width:56px;height:56px;border-radius:12px">tile 12</div>
+</div>
+<h2>Motion tokens (live)</h2>
+<div class="motion">
+  <div class="demo"><div class="disc"></div><span>rpm33 · spin-up / coast</span></div>
+  <div class="demo"><div class="lamp"></div><span>onAirPulse · 2s ∞</span></div>
+  <div class="demo"><div class="press">Tune in</div><span>pressScale · spring → .95</span></div>
+</div>
+<h2>The live waveform — spectrum's home + progress element</h2>
+<div class="wave">
+  <i style="background:#3D8BFF;height:30px;animation-delay:0s"></i><i style="background:#5E7FFF;height:22px;animation-delay:.08s"></i><i style="background:#7E77FF;height:32px;animation-delay:.16s"></i><i style="background:#9B6EFF;height:18px;animation-delay:.24s"></i><i style="background:#B265FF;height:28px;animation-delay:.32s"></i><i style="background:#CC5DEE;height:34px;animation-delay:.4s"></i><i style="background:#E655E2;height:20px;animation-delay:.48s"></i><i style="background:#FF4FD8;height:30px;animation-delay:.56s"></i><i style="background:#FF5CB4;height:24px;animation-delay:.64s"></i><i style="background:#FF6890;height:32px;animation-delay:.72s"></i><i style="background:#FF716A;height:18px;animation-delay:.8s"></i><i style="background:#FF7A3D;height:26px;animation-delay:.88s"></i>
+  <i style="background:rgba(255,255,255,.1);height:16px"></i><i style="background:rgba(255,255,255,.1);height:24px"></i><i style="background:rgba(255,255,255,.1);height:12px"></i><i style="background:rgba(255,255,255,.1);height:20px"></i><i style="background:rgba(255,255,255,.1);height:14px"></i><i style="background:rgba(255,255,255,.1);height:22px"></i>
+</div>
+<div class="card"><p><b>Interaction physics:</b> every touchable presses down to <b>0.95 on a spring</b> (PressableScale). Track changes enter with the <b>needle-drop</b> — 0.94→1 spring + fade. Votes pop 1→1.35→1. The waveform's <b>played bars light up in spectrum color</b>; the rest stay 10% white. Reduced motion: spin pauses, springs become fades, bars freeze at mid-height.</p></div>

@@ -1,0 +1,42 @@
+<!-- @dsCard group="Components" name="Chrome — wordmark, chips, badges, off-air" -->
+<style>
+:root{--bg:#0A0A0C;--raised:#131318;--sunken:#050507;--border:rgba(255,255,255,.07);--text:#F7F7F8;--dim:#A0A0AA;--faint:#62626C;--gold:#FF4655;--gold-soft:rgba(255,70,85,.15);--onair:#FF4655;--phosphor:#9A9AA3;--mono:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:32px}
+h2{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:24px 0 10px}
+h2:first-child{margin-top:0}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.wordmark{font-size:16px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+.wordmark b{color:var(--gold)}
+.bug{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--phosphor);border:1px solid var(--border);padding:5px 10px;border-radius:6px;background:var(--sunken)}
+.btn{background:var(--gold);color:#fff;font-weight:800;font-size:14px;padding:11px 24px;border-radius:999px;box-shadow:0 0 26px rgba(255,70,85,.35)}
+.btn2{background:transparent;color:var(--gold);border:1px solid var(--gold);font-weight:800;font-size:14px;padding:10px 24px;border-radius:999px}
+.btn3{background:var(--raised);color:var(--dim);border:1px solid var(--border);font-weight:700;font-size:14px;padding:10px 24px;border-radius:999px}
+.chip{display:flex;align-items:center;gap:8px;background:var(--raised);border:1px solid var(--border);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600}
+.chip .edit{color:var(--faint)}
+.tele{display:flex;align-items:center;gap:7px;background:var(--raised);border:1px solid var(--border);padding:7px 14px;border-radius:999px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--phosphor)}
+.onair{display:flex;align-items:center;gap:7px;border:1px solid var(--onair);background:rgba(255,70,85,.15);padding:7px 14px;border-radius:999px}
+.onair i{width:8px;height:8px;border-radius:50%;background:var(--onair);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.5}}
+.onair b{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--onair)}
+.ms{display:inline-flex;align-items:center;gap:6px;background:var(--gold-soft);color:var(--gold);font-size:10px;font-weight:800;padding:4px 10px;border-radius:6px;letter-spacing:.08em}
+.offair{width:300px;height:210px;background:var(--raised);border:1px solid var(--border);border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;box-shadow:inset 0 1px 0 rgba(247,247,248,.04)}
+.offair em{font-size:44px;font-style:normal}
+.offair b{font-size:26px;font-weight:900;letter-spacing:.3em;color:var(--dim)}
+.offair p{font-size:12px;color:var(--faint);text-align:center;line-height:1.5}
+</style>
+<h2>Global nav — mark · wordmark · ON AIR</h2>
+<div class="row"><div class="wordmark">TOP OF THE <b>SLOPS</b></div><div class="onair"><i></i><b>ON AIR</b></div></div>
+<h2>Buttons</h2>
+<div class="row"><div class="btn">▶ Tap to tune in</div><div class="btn2">Sign in with Apple</div><div class="btn3">Maybe later</div></div>
+<h2>Pills — identity & telemetry</h2>
+<div class="row">
+  <div class="chip"><span>🔥</span>cosmic-walkman-17<span class="edit">✎</span></div>
+  <div class="onair"><i></i><b>ON AIR</b></div>
+  <div class="tele">26 IN THE ROOM</div>
+  <div class="tele" style="color:var(--faint)">SYNC +120MS</div>
+</div>
+<h2>Milestone badge</h2>
+<div class="row"><span class="ms">M3</span><span class="ms">M4</span></div>
+<h2>Off-air failsafe</h2>
+<div class="offair"><em>📺</em><b>OFF AIR</b><p>The Slop Channel is taking a breather.<br/>Back on the decks soon.</p></div>
