@@ -12,6 +12,7 @@ import {
 import { sendChatMessage, subscribeChat } from '../chat/chatClient';
 import { colors, fonts, radius, space, type } from '../theme';
 import type { AppConfig, ChatMessage, UserProfile } from '../types';
+import { GlassPanel } from '../ui/GlassPanel';
 import { PressableScale } from '../ui/PressableScale';
 
 /** Each message lands with a small rise + fade — the room feels alive. */
@@ -80,7 +81,7 @@ export function ChatPanel({ profile, config }: Props) {
   const visible = messages.filter((m) => !muted.has(m.userId));
 
   return (
-    <View style={styles.panel}>
+    <GlassPanel style={styles.panel}>
       <View style={styles.header}>
         <Text style={styles.title}>The Room</Text>
         <View style={styles.liveDotWrap}>
@@ -151,17 +152,13 @@ export function ChatPanel({ profile, config }: Props) {
           </View>
         </>
       )}
-    </View>
+    </GlassPanel>
   );
 }
 
 const styles = StyleSheet.create({
   panel: {
     flex: 1,
-    backgroundColor: colors.bgRaised,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
     padding: space.md,
     minHeight: 260,
   },

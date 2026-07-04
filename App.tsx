@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import { attachPresence } from './src/channel/channelClient';
+import { AmbientBackdrop } from './src/components/AmbientBackdrop';
 import { ChatPanel } from './src/components/ChatPanel';
 import { LeaderboardPanel } from './src/components/LeaderboardPanel';
 import { OffAirCard } from './src/components/OffAirCard';
@@ -52,8 +53,10 @@ export default function App() {
   );
 
   return (
-    <SafeAreaView style={styles.root}>
-      <StatusBar style="light" />
+    <View style={styles.canvas}>
+      <AmbientBackdrop artworkUrl={track?.artworkUrl || null} />
+      <SafeAreaView style={styles.root}>
+        <StatusBar style="light" />
       <View style={styles.topBar}>
         <View style={styles.brand}>
           <Text style={styles.wordmark}>
@@ -89,12 +92,14 @@ export default function App() {
           </View>
         </ScrollView>
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  canvas: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1, backgroundColor: 'transparent' },
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',

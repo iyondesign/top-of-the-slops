@@ -218,8 +218,8 @@ const styles = StyleSheet.create({
     fontFamily: fonts.mono,
   },
   listenerPill: {
-    backgroundColor: colors.bgRaised,
-    borderColor: colors.border,
+    backgroundColor: colors.glassFill,
+    borderColor: colors.glassBorder,
     borderWidth: 1,
     paddingHorizontal: space.md,
     paddingVertical: 6,

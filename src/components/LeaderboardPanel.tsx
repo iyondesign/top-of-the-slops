@@ -4,6 +4,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { subscribeLeaderboards } from '../channel/channelClient';
 import { colors, radius, space, type } from '../theme';
 import type { Leaderboards, UserProfile } from '../types';
+import { GlassPanel } from '../ui/GlassPanel';
 
 interface Props {
   profile: UserProfile | null;
@@ -21,7 +22,7 @@ export function LeaderboardPanel({ profile }: Props) {
   useEffect(() => subscribeLeaderboards(setBoards), []);
 
   return (
-    <View style={styles.panel}>
+    <GlassPanel style={styles.panel}>
       <View style={styles.tabs}>
         <Tab label="Top Slops" active={tab === 'tracks'} onPress={() => setTab('tracks')} />
         <Tab
@@ -88,7 +89,7 @@ export function LeaderboardPanel({ profile }: Props) {
           })
         )}
       </ScrollView>
-    </View>
+    </GlassPanel>
   );
 }
 
@@ -111,10 +112,6 @@ function Empty({ text }: { text: string }) {
 const styles = StyleSheet.create({
   panel: {
     flex: 1,
-    backgroundColor: colors.bgRaised,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
     padding: space.md,
     minHeight: 260,
   },

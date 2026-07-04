@@ -83,6 +83,27 @@ Radii: pills `999`, cards `24`, tiles `12`. Space: `4·8·12·16·24·32·48`.
 Cards: 1px `border` + 4% white top-edge inner highlight. Desktop = chat rail +
 hero + boards rail; <1024px hero-first stack.
 
+### Surfaces: ambient backdrop + frosted glass
+
+Two layers define depth in v2 (see `design-system/foundations/glass.html`):
+
+- **Ambient backdrop** (`src/components/AmbientBackdrop.tsx`): the current
+  track's artwork, scaled 1.25×, blurred (radius 70), crossfaded on track
+  change, under a `rgba(10,10,12,.74)` scrim — the artist's colors tint the
+  whole viewport without ever competing with content in front. Tracks with no
+  artwork fall back to three soft spectrum fields, so the room is never flat
+  black.
+- **Frosted glass** (`src/ui/GlassPanel.tsx`, tokens `glassFill` /
+  `glassBorder` / `GLASS_BLUR`): fill `rgba(19,19,24,.55)`,
+  `backdrop-filter: blur(24px) saturate(160%)`, hairline `rgba(255,255,255,.09)`
+  border, radius 24. Applied to the chat rail, leaderboards, telemetry pills,
+  and the profile chip — everything behind glass reads as soft blurred color.
+  Web ships real backdrop-filter; native gets expo-blur with the M0 dev build
+  (translucent fill until then).
+
+Opaque `bgRaised` remains for surfaces that sit on other surfaces (modal
+sheets, wells) — glass is for panels floating over the ambience.
+
 ### Motion
 
 | Token | Spec | Use |

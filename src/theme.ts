@@ -40,7 +40,14 @@ export const colors = {
   vinyl: '#0E0E12',
   vinylGroove: '#202028',
   vinylLabel: '#FF4655',
+
+  // Frosted glass surfaces (over the ambient backdrop)
+  glassFill: 'rgba(19, 19, 24, 0.55)',
+  glassBorder: 'rgba(255, 255, 255, 0.09)',
 } as const;
+
+/** backdrop-filter spec for glass surfaces (web; native uses expo-blur in M0+). */
+export const GLASS_BLUR = 'blur(24px) saturate(160%)';
 
 /**
  * The spectrum — Muzaic-style gradient light on black. Reserved for live

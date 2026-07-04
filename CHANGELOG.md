@@ -11,6 +11,28 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.5.0] — 2026-07-04 — Ambient artwork backdrop + frosted glass surfaces
+
+### Added
+- **Ambient backdrop** — the current track's artwork scaled 1.25×, blurred
+  (radius 70), crossfaded on track change, blended under a `rgba(10,10,12,.74)`
+  scrim so the artist's colors tint the whole viewport without competing with
+  content (QENARA-style player backdrop). Artwork-less tracks fall back to
+  three soft spectrum fields. → `src/components/AmbientBackdrop.tsx`
+- **Frosted glass surfaces** — `GlassPanel` primitive + `glassFill` /
+  `glassBorder` / `GLASS_BLUR` tokens: `rgba(19,19,24,.55)` fill with
+  `backdrop-filter: blur(24px) saturate(160%)`; applied to the chat rail,
+  leaderboards, telemetry pill, and profile chip. Native gets expo-blur with
+  the M0 dev build. → `src/ui/GlassPanel.tsx`
+- Design system: new `foundations/glass.html` card (glass spec over ambient
+  demo); chat + leaderboard cards retrofitted with glass and ambience;
+  surfaces section in `docs/DESIGN.md`.
+
+### Versioning
+- Manifests bumped to `0.5.0`.
+
+---
+
 ## [0.4.0] — 2026-07-04 — "Signal" design language v2 + motion system
 
 Premium-modern redesign pass against the product owner's reference set
