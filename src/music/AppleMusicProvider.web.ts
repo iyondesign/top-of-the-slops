@@ -27,14 +27,10 @@ declare global {
  * The iOS/iPadOS counterpart is the M0 native module (Expo Modules API);
  * AppleMusicProvider.ts is its placeholder.
  */
-/** Load one MusicKit source and wait until the global is genuinely ready. */
-function loadMusicKitScript(src: string, ready: () => boolean): Promise<void> {
-  // Remove any corpse from a previous failed attempt so a retry
-  // genuinely re-requests the script.
-  document.querySelectorAll(`script[data-musickit]`).forEach((el) => el.remove());
-
+/** Wait until the MusicKit global is genuinely ready (event + poll). */
+function waitForMusicKitReady(ready: () => boolean, timeoutMs: number, label: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    const script = document.createElement('script');
+    if (ready()) return resolve();
     const finish = () => {
       document.removeEventListener('musickitloaded', onLoaded);
       clearInterval(poll);
@@ -45,15 +41,6 @@ function loadMusicKitScript(src: string, ready: () => boolean): Promise<void> {
       resolve();
     };
     document.addEventListener('musickitloaded', onLoaded, { once: true });
-    script.src = src;
-    script.async = true;
-    script.setAttribute('data-musickit', '1');
-    script.onerror = () => {
-      finish();
-      script.remove();
-      reject(new Error(`${src}: request failed (blocked or offline)`));
-    };
-    document.head.appendChild(script);
     const poll = setInterval(() => {
       if (ready()) {
         finish();
@@ -62,9 +49,53 @@ function loadMusicKitScript(src: string, ready: () => boolean): Promise<void> {
     }, 100);
     const timer = setTimeout(() => {
       finish();
+      reject(new Error(`${label}: loaded but MusicKit never became ready`));
+    }, timeoutMs);
+  });
+}
+
+/**
+ * Preferred path: fetch the same-origin copy and execute it with every
+ * Node-ish global SHADOWED to undefined. MusicKit v3's environment sniff
+ * uses bare identifiers (process.versions.node, Buffer, module…) that
+ * collide with Metro's partial web polyfills — shadowing them forces its
+ * browser code path deterministically instead of shimming Node globals
+ * one whack-a-mole at a time.
+ */
+async function loadViaScopedEval(src: string, ready: () => boolean): Promise<void> {
+  const res = await fetch(src);
+  if (!res.ok) throw new Error(`${src}: HTTP ${res.status} (run the curl in public/README-musickit.md)`);
+  const code = await res.text();
+  // eslint-disable-next-line no-new-func
+  new Function(
+    'process',
+    'Buffer',
+    'module',
+    'exports',
+    'require',
+    'global',
+    code + '\n//# sourceURL=' + src,
+  )(undefined, undefined, undefined, undefined, undefined, window);
+  await waitForMusicKitReady(ready, 8_000, src);
+}
+
+/** Legacy fallback: plain script tag (environments without the Metro clash). */
+function loadViaScriptTag(src: string, ready: () => boolean): Promise<void> {
+  document.querySelectorAll(`script[data-musickit]`).forEach((el) => el.remove());
+  return new Promise<void>((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.setAttribute('data-musickit', '1');
+    script.onerror = () => {
       script.remove();
-      reject(new Error(`${src}: loaded but MusicKit never became ready (neutered by a blocker/proxy?)`));
-    }, 12_000);
+      reject(new Error(`${src}: request failed (blocked or offline)`));
+    };
+    document.head.appendChild(script);
+    waitForMusicKitReady(ready, 12_000, src).then(resolve, (err) => {
+      script.remove();
+      reject(err);
+    });
   });
 }
 
@@ -109,15 +140,30 @@ export class AppleMusicProvider implements MusicProvider {
 
     if (!ready()) {
       const failures: string[] = [];
-      for (const src of MUSICKIT_SOURCES) {
-        try {
-          await loadMusicKitScript(src, ready);
-          console.log(`[tots] MusicKit ready via ${src}`);
-          break;
-        } catch (err: any) {
-          failures.push(err?.message ?? String(err));
+
+      // 1) Same-origin copy, executed with Node globals shadowed — the
+      //    reliable path under Metro web.
+      try {
+        await loadViaScopedEval('/musickit.js', ready);
+        console.log('[tots] MusicKit ready via /musickit.js (scoped eval)');
+      } catch (err: any) {
+        failures.push(err?.message ?? String(err));
+      }
+
+      // 2) CDN script tag fallback for environments without the clash.
+      if (!ready()) {
+        for (const src of MUSICKIT_SOURCES) {
+          if (src === '/musickit.js') continue;
+          try {
+            await loadViaScriptTag(src, ready);
+            console.log(`[tots] MusicKit ready via ${src}`);
+            break;
+          } catch (err: any) {
+            failures.push(err?.message ?? String(err));
+          }
         }
       }
+
       if (!ready()) {
         throw new Error(
           `MusicKit could not initialize from any source.\n- ${failures.join('\n- ')}\n` +
