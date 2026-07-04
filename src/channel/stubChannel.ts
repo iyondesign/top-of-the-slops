@@ -113,7 +113,12 @@ export class StubChannel {
    */
   addToPool(track: Track): boolean {
     if (this.pool.some((t) => t.id === track.id)) return false;
-    this.pool = [...this.pool, track];
+    // The stub rotates on the 30s preview boundary — clamp full catalog
+    // durations (e.g. library imports) so the demo room keeps moving.
+    this.pool = [
+      ...this.pool,
+      { ...track, durationMs: Math.min(track.durationMs || STUB_TRACK_DURATION_MS, STUB_TRACK_DURATION_MS) },
+    ];
     this.trackListeners.forEach((l) => l(this.pool));
     return true;
   }

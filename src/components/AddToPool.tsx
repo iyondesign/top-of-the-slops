@@ -13,7 +13,7 @@ import {
 
 import { addToPool, subscribeTrackPool } from '../channel/channelClient';
 import { useMusicAuth } from '../hooks/useMusicAuth';
-import { searchCatalog } from '../music';
+import { fetchUserLibrary, searchCatalog } from '../music';
 import { colors, fonts, radius, space, type } from '../theme';
 import type { Track } from '../types';
 import { GlassPanel } from '../ui/GlassPanel';
@@ -32,9 +32,23 @@ export function AddToPool() {
   const [searching, setSearching] = useState(false);
   const [poolIds, setPoolIds] = useState<Set<string>>(new Set());
   const [justAdded, setJustAdded] = useState<Set<string>>(new Set());
+  const [library, setLibrary] = useState<Track[]>([]);
+  const [libraryLoading, setLibraryLoading] = useState(false);
+  const [libraryLoaded, setLibraryLoaded] = useState(false);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { status, connecting, connect, configured } = useMusicAuth();
+
+  // The proof of auth: once connected, pull the user's actual library.
+  useEffect(() => {
+    if (!open || status !== 'subscriber' || libraryLoaded || libraryLoading) return;
+    setLibraryLoading(true);
+    void fetchUserLibrary(24).then((tracks) => {
+      setLibrary(tracks);
+      setLibraryLoading(false);
+      setLibraryLoaded(true);
+    });
+  }, [open, status, libraryLoaded, libraryLoading]);
 
   useEffect(
     () => subscribeTrackPool((tracks) => setPoolIds(new Set(tracks.map((t) => t.id)))),
@@ -126,39 +140,40 @@ export function AddToPool() {
               <ScrollView style={styles.results} keyboardShouldPersistTaps="handled">
                 {searching && <ActivityIndicator color={colors.accent} style={{ marginTop: space.md }} />}
                 {!searching &&
-                  results.map((track) => {
-                    const inPool = poolIds.has(track.id) || justAdded.has(track.id);
-                    return (
-                      <View key={track.id} style={styles.resultRow}>
-                        {track.artworkUrl ? (
-                          <Image source={{ uri: track.artworkUrl }} style={styles.resultArt} />
-                        ) : (
-                          <View style={[styles.resultArt, styles.resultArtFallback]}>
-                            <Text>💿</Text>
-                          </View>
-                        )}
-                        <View style={styles.resultBody}>
-                          <Text style={styles.resultTitle} numberOfLines={1}>
-                            {track.title}
-                          </Text>
-                          <Text style={styles.resultArtist} numberOfLines={1}>
-                            {track.artist}
-                          </Text>
-                        </View>
-                        <PressableScale
-                          style={StyleSheet.flatten([styles.addBtn, inPool && styles.addBtnDone])}
-                          onPress={() => add(track)}
-                          disabled={inPool}
-                        >
-                          <Text style={[styles.addBtnText, inPool && styles.addBtnTextDone]}>
-                            {inPool ? '✓ In pool' : '＋ Add'}
-                          </Text>
-                        </PressableScale>
-                      </View>
-                    );
-                  })}
+                  results.map((track) => (
+                    <TrackRow
+                      key={track.id}
+                      track={track}
+                      inPool={poolIds.has(track.id) || justAdded.has(track.id)}
+                      onAdd={add}
+                    />
+                  ))}
                 {!searching && query.trim() !== '' && results.length === 0 && (
                   <Text style={styles.empty}>No tracks found.</Text>
+                )}
+
+                {/* Your music, received: the library the user token unlocked. */}
+                {status === 'subscriber' && query.trim() === '' && (
+                  <View style={styles.librarySection}>
+                    <Text style={styles.libraryHeader}>FROM YOUR APPLE MUSIC LIBRARY</Text>
+                    {libraryLoading && (
+                      <ActivityIndicator color={colors.accent} style={{ marginTop: space.sm }} />
+                    )}
+                    {!libraryLoading &&
+                      library.map((track) => (
+                        <TrackRow
+                          key={track.id}
+                          track={track}
+                          inPool={poolIds.has(track.id) || justAdded.has(track.id)}
+                          onAdd={add}
+                        />
+                      ))}
+                    {!libraryLoading && libraryLoaded && library.length === 0 && (
+                      <Text style={styles.empty}>
+                        Connected, but your library came back empty — try searching instead.
+                      </Text>
+                    )}
+                  </View>
                 )}
               </ScrollView>
             </GlassPanel>
@@ -166,6 +181,45 @@ export function AddToPool() {
         </Pressable>
       </Modal>
     </>
+  );
+}
+
+function TrackRow({
+  track,
+  inPool,
+  onAdd,
+}: {
+  track: Track;
+  inPool: boolean;
+  onAdd: (track: Track) => void;
+}) {
+  return (
+    <View style={styles.resultRow}>
+      {track.artworkUrl ? (
+        <Image source={{ uri: track.artworkUrl }} style={styles.resultArt} />
+      ) : (
+        <View style={[styles.resultArt, styles.resultArtFallback]}>
+          <Text>💿</Text>
+        </View>
+      )}
+      <View style={styles.resultBody}>
+        <Text style={styles.resultTitle} numberOfLines={1}>
+          {track.title}
+        </Text>
+        <Text style={styles.resultArtist} numberOfLines={1}>
+          {track.artist}
+        </Text>
+      </View>
+      <PressableScale
+        style={StyleSheet.flatten([styles.addBtn, inPool && styles.addBtnDone])}
+        onPress={() => onAdd(track)}
+        disabled={inPool}
+      >
+        <Text style={[styles.addBtnText, inPool && styles.addBtnTextDone]}>
+          {inPool ? '✓ In pool' : '＋ Add'}
+        </Text>
+      </PressableScale>
+    </View>
   );
 }
 
@@ -255,4 +309,17 @@ const styles = StyleSheet.create({
   addBtnText: { color: colors.accent, fontSize: type.micro, fontWeight: '800' },
   addBtnTextDone: { color: colors.textFaint },
   empty: { color: colors.textFaint, fontSize: type.caption, textAlign: 'center', marginTop: space.md },
+  librarySection: {
+    marginTop: space.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingTop: space.sm,
+  },
+  libraryHeader: {
+    color: colors.telemetry,
+    fontSize: type.micro,
+    fontFamily: fonts.mono,
+    letterSpacing: 1,
+    marginBottom: space.xs,
+  },
 });
