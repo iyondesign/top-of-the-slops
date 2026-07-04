@@ -11,6 +11,28 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.12.0] — 2026-07-04 — Your Apple Music library, received
+
+### Added
+- **`getUserLibrary`** on the Apple provider: after Connect Apple Music,
+  the Music-User-Token pulls the signed-in user's library songs
+  (`/v1/me/library/songs`, catalog ids preferred so channel playback works
+  everywhere). Exposed via `fetchUserLibrary()`.
+- **"From your Apple Music library"** section in Feed the channel — loads
+  automatically once connected; every library song has an ＋ Add into the
+  shared pool. The visible proof that auth received your music details.
+
+### Changed
+- `isAppleConfigured` now requires a real JWT (`eyJ…`) — placeholder values
+  left in `.env` no longer count as configured.
+- Stub pool clamps imported full-length durations to the 30s preview
+  boundary so the demo room keeps rotating.
+
+### Versioning
+- Manifests bumped to `0.12.0`.
+
+---
+
 ## [0.11.0] — 2026-07-04 — Wired to the real Firebase project
 
 ### Changed

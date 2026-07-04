@@ -19,6 +19,13 @@ export interface MusicProvider {
   search(query: string, limit?: number): Promise<Track[]>;
   getPreviewUrl(trackId: string): Promise<string | null>;
 
+  /**
+   * The signed-in user's library songs (requires authorize() first —
+   * MusicKit's Music-User-Token). Providers without user-library access
+   * omit this.
+   */
+  getUserLibrary?(limit?: number): Promise<Track[]>;
+
   /** Load and play a track from a position (ms). */
   play(trackId: string, positionMs: number): Promise<void>;
   pause(): Promise<void>;

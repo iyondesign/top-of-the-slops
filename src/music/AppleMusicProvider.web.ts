@@ -86,6 +86,32 @@ export class AppleMusicProvider implements MusicProvider {
     return track?.previewUrl ?? null;
   }
 
+  /**
+   * The user's library songs via the Music-User-Token that authorize()
+   * granted. Library items carry library ids (i.xxx); we prefer the
+   * catalog id from playParams so channel playback works everywhere.
+   */
+  async getUserLibrary(limit = 24): Promise<Track[]> {
+    const music = await this.music();
+    if (!music.isAuthorized) return [];
+    const res = await music.api.music('/v1/me/library/songs', { limit });
+    const items = res?.data?.data ?? [];
+    return items.map((song: any) => {
+      const attrs = song.attributes ?? {};
+      return {
+        id: String(attrs.playParams?.catalogId ?? song.id),
+        title: attrs.name ?? 'Unknown',
+        artist: attrs.artistName ?? 'Unknown',
+        artworkUrl: attrs.artwork
+          ? window.MusicKit!.formatArtworkURL(attrs.artwork, 600, 600)
+          : '',
+        previewUrl: attrs.previews?.[0]?.url ?? null,
+        durationMs: attrs.durationInMillis ?? 0,
+        source: 'apple' as const,
+      };
+    });
+  }
+
   async play(trackId: string, positionMs: number): Promise<void> {
     const music = await this.music();
     await music.setQueue({ song: trackId });

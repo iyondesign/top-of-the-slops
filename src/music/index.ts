@@ -14,9 +14,26 @@ export interface MusicMachine {
   appleConfigured: boolean;
 }
 
-/** Is an Apple developer token wired in this build? */
+/** Is a real Apple developer token wired in this build? (JWTs start with
+ * "eyJ" — guards against placeholder values left in .env.) */
 export function isAppleConfigured(): boolean {
-  return Boolean(process.env.EXPO_PUBLIC_APPLE_DEVELOPER_TOKEN);
+  const token = process.env.EXPO_PUBLIC_APPLE_DEVELOPER_TOKEN;
+  return Boolean(token && token.startsWith('eyJ'));
+}
+
+/**
+ * The signed-in user's Apple Music library (empty until authorize() has
+ * been granted, or when the provider has no user-library access).
+ */
+export async function fetchUserLibrary(limit = 24): Promise<Track[]> {
+  const { provider } = getMusicMachine();
+  if (!provider.getUserLibrary) return [];
+  try {
+    return await provider.getUserLibrary(limit);
+  } catch (err) {
+    console.warn('[tots] user library fetch failed', err);
+    return [];
+  }
 }
 
 /**
@@ -36,9 +53,10 @@ export function getMusicMachine(): MusicMachine {
   if (machine) return machine;
   const preview = new PreviewMusicProvider();
   const token = process.env.EXPO_PUBLIC_APPLE_DEVELOPER_TOKEN;
-  machine = token
-    ? { provider: new AppleMusicProvider(token), preview, appleConfigured: true }
-    : { provider: preview, preview, appleConfigured: false };
+  machine =
+    token && isAppleConfigured()
+      ? { provider: new AppleMusicProvider(token), preview, appleConfigured: true }
+      : { provider: preview, preview, appleConfigured: false };
   return machine;
 }
 
