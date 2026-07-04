@@ -11,6 +11,16 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.7.1] — 2026-07-04 — Room header: one line
+
+### Changed
+- Merged the panel title into the tabs: the chat tab is now **"The Room"**
+  (no separate title), so the tabs read The Room / Top Slops / Tastemakers.
+- Presence dropped the "IN THE ROOM" text — now just a live dot + count —
+  and moved onto the tab line, right-aligned. Whole header is one row.
+
+---
+
 ## [0.7.0] — 2026-07-04 — The Room: one consolidated social panel
 
 Layout consolidation per the VyRT artist-view reference: a dominant artist

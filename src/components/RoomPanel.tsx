@@ -46,24 +46,20 @@ export function RoomPanel({ profile, config, state }: Props) {
 
   return (
     <GlassPanel style={styles.panel}>
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>The Room</Text>
+      <View style={styles.tabRow}>
+        <View style={styles.tabs}>
+          <TabButton label="The Room" active={tab === 'chat'} onPress={() => setTab('chat')} />
+          <TabButton label="Top Slops" active={tab === 'tracks'} onPress={() => setTab('tracks')} />
+          <TabButton
+            label="Tastemakers"
+            active={tab === 'tastemakers'}
+            onPress={() => setTab('tastemakers')}
+          />
+        </View>
         <View style={styles.presence}>
           <View style={styles.presenceDot} />
-          <Text style={styles.presenceText}>
-            {state?.listenerCount ?? '—'} IN THE ROOM
-          </Text>
+          <Text style={styles.presenceText}>{state?.listenerCount ?? '—'}</Text>
         </View>
-      </View>
-
-      <View style={styles.tabs}>
-        <TabButton label="Chat" active={tab === 'chat'} onPress={() => setTab('chat')} />
-        <TabButton label="Top Slops" active={tab === 'tracks'} onPress={() => setTab('tracks')} />
-        <TabButton
-          label="Tastemakers"
-          active={tab === 'tastemakers'}
-          onPress={() => setTab('tastemakers')}
-        />
       </View>
 
       {tab === 'chat' ? (
@@ -294,24 +290,24 @@ const styles = StyleSheet.create({
     padding: space.md,
     minHeight: 300,
   },
-  headerRow: {
+  tabRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: space.sm,
+    gap: space.sm,
   },
-  title: { color: colors.text, fontSize: type.body, fontFamily: fonts.display },
-  presence: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  presence: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   presenceDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.live },
   presenceText: {
     color: colors.telemetry,
-    fontSize: type.micro,
+    fontSize: type.caption,
     fontFamily: fonts.mono,
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
-  tabs: { flexDirection: 'row', gap: space.xs + 2 },
+  tabs: { flexDirection: 'row', gap: space.xs + 1, flexShrink: 1 },
   tab: {
-    paddingHorizontal: space.md - 2,
+    paddingHorizontal: space.sm + 2,
     paddingVertical: 6,
     borderRadius: radius.full,
     backgroundColor: colors.bgSunken,
