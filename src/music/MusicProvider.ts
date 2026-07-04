@@ -22,9 +22,18 @@ export interface MusicProvider {
   /**
    * The signed-in user's library songs (requires authorize() first —
    * MusicKit's Music-User-Token). Providers without user-library access
-   * omit this.
+   * omit these.
    */
   getUserLibrary?(limit?: number): Promise<Track[]>;
+
+  /** Recently played tracks — the natural default for picking music. */
+  getRecentTracks?(limit?: number): Promise<Track[]>;
+
+  /** The user's library playlists. */
+  getUserPlaylists?(limit?: number): Promise<MusicPlaylist[]>;
+
+  /** Tracks inside one library playlist. */
+  getPlaylistTracks?(playlistId: string, limit?: number): Promise<Track[]>;
 
   /** Load and play a track from a position (ms). */
   play(trackId: string, positionMs: number): Promise<void>;
@@ -36,6 +45,12 @@ export interface MusicProvider {
 
   /** Tear down audio resources. */
   destroy(): void;
+}
+
+export interface MusicPlaylist {
+  id: string;
+  name: string;
+  artworkUrl: string;
 }
 
 /**

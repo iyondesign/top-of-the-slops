@@ -1,5 +1,34 @@
 import type { MusicTier, Track } from '../types';
-import type { MusicProvider } from './MusicProvider';
+import type { MusicPlaylist, MusicProvider } from './MusicProvider';
+
+/**
+ * Map catalog songs AND library-songs to our Track shape. Catalog items
+ * (type "songs") carry the catalog id directly; library items (i.xxx)
+ * prefer playParams.catalogId so channel playback works for everyone.
+ * Items with no resolvable id (rare local uploads) are dropped.
+ */
+function mapSongs(items: any[] | undefined): Track[] {
+  return (items ?? [])
+    .map((song: any) => {
+      const attrs = song.attributes ?? {};
+      const id =
+        song.type === 'songs'
+          ? String(song.id)
+          : String(attrs.playParams?.catalogId ?? song.id ?? '');
+      return {
+        id,
+        title: attrs.name ?? 'Unknown',
+        artist: attrs.artistName ?? 'Unknown',
+        artworkUrl: attrs.artwork
+          ? window.MusicKit!.formatArtworkURL(attrs.artwork, 600, 600)
+          : '',
+        previewUrl: attrs.previews?.[0]?.url ?? null,
+        durationMs: attrs.durationInMillis ?? 0,
+        source: 'apple' as const,
+      };
+    })
+    .filter((t: Track) => t.id && t.id !== 'undefined');
+}
 
 /**
  * MusicKit sources, tried in order. The same-origin fallback sidesteps
@@ -220,28 +249,49 @@ export class AppleMusicProvider implements MusicProvider {
 
   /**
    * The user's library songs via the Music-User-Token that authorize()
-   * granted. Library items carry library ids (i.xxx); we prefer the
-   * catalog id from playParams so channel playback works everywhere.
+   * granted (alphabetical — the browse fallback).
    */
   async getUserLibrary(limit = 24): Promise<Track[]> {
     const music = await this.music();
     if (!music.isAuthorized) return [];
     const res = await music.api.music('/v1/me/library/songs', { limit });
-    const items = res?.data?.data ?? [];
-    return items.map((song: any) => {
-      const attrs = song.attributes ?? {};
-      return {
-        id: String(attrs.playParams?.catalogId ?? song.id),
-        title: attrs.name ?? 'Unknown',
-        artist: attrs.artistName ?? 'Unknown',
-        artworkUrl: attrs.artwork
-          ? window.MusicKit!.formatArtworkURL(attrs.artwork, 600, 600)
-          : '',
-        previewUrl: attrs.previews?.[0]?.url ?? null,
-        durationMs: attrs.durationInMillis ?? 0,
-        source: 'apple' as const,
-      };
+    return mapSongs(res?.data?.data);
+  }
+
+  /** Recently played tracks — the natural default when picking music. */
+  async getRecentTracks(limit = 30): Promise<Track[]> {
+    const music = await this.music();
+    if (!music.isAuthorized) return [];
+    const res = await music.api.music('/v1/me/recent/played/tracks', {
+      limit: Math.min(limit, 30),
+      types: 'songs,library-songs',
     });
+    return mapSongs(res?.data?.data);
+  }
+
+  /** The user's library playlists. */
+  async getUserPlaylists(limit = 50): Promise<MusicPlaylist[]> {
+    const music = await this.music();
+    if (!music.isAuthorized) return [];
+    const res = await music.api.music('/v1/me/library/playlists', { limit });
+    const items = res?.data?.data ?? [];
+    return items.map((p: any) => ({
+      id: String(p.id),
+      name: p.attributes?.name ?? 'Untitled playlist',
+      artworkUrl: p.attributes?.artwork
+        ? window.MusicKit!.formatArtworkURL(p.attributes.artwork, 300, 300)
+        : '',
+    }));
+  }
+
+  /** Tracks inside one library playlist. */
+  async getPlaylistTracks(playlistId: string, limit = 100): Promise<Track[]> {
+    const music = await this.music();
+    if (!music.isAuthorized) return [];
+    const res = await music.api.music(`/v1/me/library/playlists/${playlistId}/tracks`, {
+      limit: Math.min(limit, 100),
+    });
+    return mapSongs(res?.data?.data);
   }
 
   async play(trackId: string, positionMs: number): Promise<void> {

@@ -13,7 +13,14 @@ import {
 
 import { addToPool, subscribeTrackPool } from '../channel/channelClient';
 import { useMusicAuth } from '../hooks/useMusicAuth';
-import { fetchUserLibrary, searchCatalog } from '../music';
+import {
+  fetchPlaylistTracks,
+  fetchRecentTracks,
+  fetchUserLibrary,
+  fetchUserPlaylists,
+  searchCatalog,
+  type MusicPlaylist,
+} from '../music';
 import { colors, fonts, radius, space, type } from '../theme';
 import type { Track } from '../types';
 import { GlassPanel } from '../ui/GlassPanel';
@@ -32,23 +39,40 @@ export function AddToPool() {
   const [searching, setSearching] = useState(false);
   const [poolIds, setPoolIds] = useState<Set<string>>(new Set());
   const [justAdded, setJustAdded] = useState<Set<string>>(new Set());
-  const [library, setLibrary] = useState<Track[]>([]);
-  const [libraryLoading, setLibraryLoading] = useState(false);
-  const [libraryLoaded, setLibraryLoaded] = useState(false);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Browse-your-music state: Recents is the default (people pick from
+  // what they actually play, not from "A.A.R.O.N. — A.B.C.").
+  type BrowseMode = 'recents' | 'playlists' | 'library';
+  const [mode, setMode] = useState<BrowseMode>('recents');
+  const [browseTracks, setBrowseTracks] = useState<Track[]>([]);
+  const [browseLoading, setBrowseLoading] = useState(false);
+  const [playlists, setPlaylists] = useState<MusicPlaylist[] | null>(null);
+  const [openPlaylist, setOpenPlaylist] = useState<MusicPlaylist | null>(null);
 
   const { status, connecting, connect, configured } = useMusicAuth();
 
-  // The proof of auth: once connected, pull the user's actual library.
+  // Load whatever the current browse view needs, lazily.
   useEffect(() => {
-    if (!open || status !== 'subscriber' || libraryLoaded || libraryLoading) return;
-    setLibraryLoading(true);
-    void fetchUserLibrary(24).then((tracks) => {
-      setLibrary(tracks);
-      setLibraryLoading(false);
-      setLibraryLoaded(true);
+    if (!open || status !== 'subscriber') return;
+    let cancelled = false;
+    setBrowseLoading(true);
+    const load = async (): Promise<Track[]> => {
+      if (mode === 'recents') return fetchRecentTracks(30);
+      if (mode === 'library') return fetchUserLibrary(50);
+      if (openPlaylist) return fetchPlaylistTracks(openPlaylist.id, 100);
+      if (!playlists) setPlaylists(await fetchUserPlaylists(50));
+      return [];
+    };
+    void load().then((tracks) => {
+      if (cancelled) return;
+      setBrowseTracks(tracks);
+      setBrowseLoading(false);
     });
-  }, [open, status, libraryLoaded, libraryLoading]);
+    return () => {
+      cancelled = true;
+    };
+  }, [open, status, mode, openPlaylist]);
 
   useEffect(
     () => subscribeTrackPool((tracks) => setPoolIds(new Set(tracks.map((t) => t.id)))),
@@ -152,15 +176,91 @@ export function AddToPool() {
                   <Text style={styles.empty}>No tracks found.</Text>
                 )}
 
-                {/* Your music, received: the library the user token unlocked. */}
+                {/* Your music, received: recents / playlists / A–Z. */}
                 {status === 'subscriber' && query.trim() === '' && (
                   <View style={styles.librarySection}>
-                    <Text style={styles.libraryHeader}>FROM YOUR APPLE MUSIC LIBRARY</Text>
-                    {libraryLoading && (
+                    <View style={styles.browseChips}>
+                      {(
+                        [
+                          ['recents', 'Recents'],
+                          ['playlists', 'Playlists'],
+                          ['library', 'A–Z'],
+                        ] as const
+                      ).map(([m, label]) => (
+                        <PressableScale
+                          key={m}
+                          style={StyleSheet.flatten([
+                            styles.chip,
+                            mode === m && styles.chipActive,
+                          ])}
+                          onPress={() => {
+                            setOpenPlaylist(null);
+                            setMode(m);
+                          }}
+                        >
+                          <Text style={[styles.chipText, mode === m && styles.chipTextActive]}>
+                            {label}
+                          </Text>
+                        </PressableScale>
+                      ))}
+                    </View>
+
+                    {browseLoading && (
                       <ActivityIndicator color={colors.accent} style={{ marginTop: space.sm }} />
                     )}
-                    {!libraryLoading &&
-                      library.map((track) => (
+
+                    {/* Playlist picker */}
+                    {!browseLoading && mode === 'playlists' && !openPlaylist && (
+                      <>
+                        {(playlists ?? []).map((pl) => (
+                          <PressableScale
+                            key={pl.id}
+                            style={styles.playlistRow}
+                            onPress={() => setOpenPlaylist(pl)}
+                          >
+                            {pl.artworkUrl ? (
+                              <Image source={{ uri: pl.artworkUrl }} style={styles.resultArt} />
+                            ) : (
+                              <View style={[styles.resultArt, styles.resultArtFallback]}>
+                                <Text>🎶</Text>
+                              </View>
+                            )}
+                            <Text style={styles.playlistName} numberOfLines={1}>
+                              {pl.name}
+                            </Text>
+                            <Text style={styles.playlistChevron}>›</Text>
+                          </PressableScale>
+                        ))}
+                        {playlists !== null && playlists.length === 0 && (
+                          <Text style={styles.empty}>No playlists in your library yet.</Text>
+                        )}
+                      </>
+                    )}
+
+                    {/* Inside a playlist */}
+                    {mode === 'playlists' && openPlaylist && (
+                      <View style={styles.playlistHeader}>
+                        <PressableScale onPress={() => setOpenPlaylist(null)}>
+                          <Text style={styles.backLink}>‹ Playlists</Text>
+                        </PressableScale>
+                        <Text style={styles.playlistTitle} numberOfLines={1}>
+                          {openPlaylist.name}
+                        </Text>
+                        {!browseLoading && browseTracks.length > 0 && (
+                          <PressableScale
+                            style={styles.addAll}
+                            onPress={() => browseTracks.forEach((t) => add(t))}
+                          >
+                            <Text style={styles.addAllText}>＋ Add all</Text>
+                          </PressableScale>
+                        )}
+                      </View>
+                    )}
+
+                    {/* Track rows for recents / library / open playlist */}
+                    {!browseLoading &&
+                      (mode !== 'playlists' || openPlaylist) &&
+                      browseTracks.map((track) => (
                         <TrackRow
                           key={track.id}
                           track={track}
@@ -168,11 +268,11 @@ export function AddToPool() {
                           onAdd={add}
                         />
                       ))}
-                    {!libraryLoading && libraryLoaded && library.length === 0 && (
-                      <Text style={styles.empty}>
-                        Connected, but your library came back empty — try searching instead.
-                      </Text>
-                    )}
+                    {!browseLoading &&
+                      (mode !== 'playlists' || openPlaylist) &&
+                      browseTracks.length === 0 && (
+                        <Text style={styles.empty}>Nothing here yet — try searching instead.</Text>
+                      )}
                   </View>
                 )}
               </ScrollView>
@@ -315,11 +415,38 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     paddingTop: space.sm,
   },
-  libraryHeader: {
-    color: colors.telemetry,
-    fontSize: type.micro,
-    fontFamily: fonts.mono,
-    letterSpacing: 1,
-    marginBottom: space.xs,
+  browseChips: { flexDirection: 'row', gap: space.xs + 2, marginBottom: space.xs },
+  chip: {
+    paddingHorizontal: space.sm + 4,
+    paddingVertical: 5,
+    borderRadius: radius.full,
+    backgroundColor: colors.bgSunken,
   },
+  chipActive: { backgroundColor: colors.accentSoft },
+  chipText: { color: colors.textFaint, fontSize: type.caption, fontFamily: fonts.displayMedium },
+  chipTextActive: { color: colors.accent },
+  playlistRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    paddingVertical: space.xs + 2,
+  },
+  playlistName: { flex: 1, color: colors.text, fontSize: type.caption, fontWeight: '700' },
+  playlistChevron: { color: colors.textFaint, fontSize: type.title },
+  playlistHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    paddingVertical: space.xs + 2,
+  },
+  backLink: { color: colors.accent, fontSize: type.caption, fontWeight: '700' },
+  playlistTitle: { flex: 1, color: colors.text, fontSize: type.caption, fontFamily: fonts.display },
+  addAll: {
+    borderWidth: 1,
+    borderColor: colors.accent,
+    borderRadius: radius.full,
+    paddingHorizontal: space.sm + 4,
+    paddingVertical: 5,
+  },
+  addAllText: { color: colors.accent, fontSize: type.micro, fontWeight: '800' },
 });

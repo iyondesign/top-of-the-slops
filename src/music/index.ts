@@ -1,9 +1,9 @@
 import type { Track } from '../types';
 import { AppleMusicProvider } from './AppleMusicProvider';
-import type { MusicProvider } from './MusicProvider';
+import type { MusicPlaylist, MusicProvider } from './MusicProvider';
 import { PreviewMusicProvider } from './PreviewMusicProvider';
 
-export type { MusicProvider } from './MusicProvider';
+export type { MusicPlaylist, MusicProvider } from './MusicProvider';
 export { DRIFT_TOLERANCE_MS } from './MusicProvider';
 export { PreviewMusicProvider } from './PreviewMusicProvider';
 
@@ -32,6 +32,42 @@ export async function fetchUserLibrary(limit = 24): Promise<Track[]> {
     return await provider.getUserLibrary(limit);
   } catch (err) {
     console.warn('[tots] user library fetch failed', err);
+    return [];
+  }
+}
+
+/** Recently played tracks — falls back to the A–Z library when empty. */
+export async function fetchRecentTracks(limit = 30): Promise<Track[]> {
+  const { provider } = getMusicMachine();
+  if (provider.getRecentTracks) {
+    try {
+      const recent = await provider.getRecentTracks(limit);
+      if (recent.length > 0) return recent;
+    } catch (err) {
+      console.warn('[tots] recent tracks fetch failed', err);
+    }
+  }
+  return fetchUserLibrary(limit);
+}
+
+export async function fetchUserPlaylists(limit = 50): Promise<MusicPlaylist[]> {
+  const { provider } = getMusicMachine();
+  if (!provider.getUserPlaylists) return [];
+  try {
+    return await provider.getUserPlaylists(limit);
+  } catch (err) {
+    console.warn('[tots] playlists fetch failed', err);
+    return [];
+  }
+}
+
+export async function fetchPlaylistTracks(playlistId: string, limit = 100): Promise<Track[]> {
+  const { provider } = getMusicMachine();
+  if (!provider.getPlaylistTracks) return [];
+  try {
+    return await provider.getPlaylistTracks(playlistId, limit);
+  } catch (err) {
+    console.warn('[tots] playlist tracks fetch failed', err);
     return [];
   }
 }

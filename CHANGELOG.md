@@ -11,6 +11,30 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.13.0] — 2026-07-04 — Browse your music: Recents · Playlists · A–Z
+
+### Added
+- **Recents is the new default** when picking music: `/v1/me/recent/played/
+  tracks` (falls back to the A–Z library when empty) — you pick from what
+  you actually play, not from an alphabet.
+- **Playlists browser**: list your library playlists, drill into one, add
+  tracks individually or **＋ Add all** (up to 100) into the shared pool.
+- Provider methods `getRecentTracks` / `getUserPlaylists` /
+  `getPlaylistTracks` + shared catalog/library song mapper; facade
+  wrappers with graceful fallbacks.
+
+### Fixed (in the field, this session)
+- MusicKit v3 under Metro web: environment-sniff crashes
+  (`process.versions.node`, `Buffer`) resolved by executing the
+  self-hosted copy with Node globals shadowed (scoped eval); CDN tag kept
+  as fallback. First live Apple Music sign-in + library fetch confirmed
+  working end-to-end with a validated developer token.
+
+### Versioning
+- Manifests bumped to `0.13.0`.
+
+---
+
 ## [0.12.0] — 2026-07-04 — Your Apple Music library, received
 
 ### Added
