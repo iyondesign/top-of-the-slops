@@ -52,15 +52,18 @@ export function isLiveBackend(): boolean {
 }
 
 function resolveConfig() {
+  // `||` not `??` on purpose: an empty-string env var (a blank line in
+  // .env) must fall back to the committed default, not blank out the
+  // config and break Firebase init.
   return {
-    apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? DEFAULT_CONFIG.apiKey,
-    authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ?? DEFAULT_CONFIG.authDomain,
-    projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ?? DEFAULT_CONFIG.projectId,
-    databaseURL: process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL ?? DEFAULT_CONFIG.databaseURL,
-    storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ?? DEFAULT_CONFIG.storageBucket,
+    apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || DEFAULT_CONFIG.apiKey,
+    authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || DEFAULT_CONFIG.authDomain,
+    projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || DEFAULT_CONFIG.projectId,
+    databaseURL: process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL || DEFAULT_CONFIG.databaseURL,
+    storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || DEFAULT_CONFIG.storageBucket,
     messagingSenderId:
-      process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? DEFAULT_CONFIG.messagingSenderId,
-    appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? DEFAULT_CONFIG.appId,
+      process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || DEFAULT_CONFIG.messagingSenderId,
+    appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || DEFAULT_CONFIG.appId,
   };
 }
 
