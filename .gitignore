@@ -151,3 +151,6 @@ expo-env.d.ts
 # Local env
 .env
 .env.local
+
+# Self-hosted MusicKit copy (fetch locally, never commit Apple's bundle)
+public/musickit.js

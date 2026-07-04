@@ -1,7 +1,16 @@
 import type { MusicTier, Track } from '../types';
 import type { MusicProvider } from './MusicProvider';
 
-const MUSICKIT_JS_URL = 'https://js-cdn.music.apple.com/musickit/v3/musickit.js';
+/**
+ * MusicKit sources, tried in order. The same-origin fallback sidesteps
+ * content blockers / corporate proxies that neuter Apple's CDN URL —
+ * populate it once with:
+ *   curl -o public/musickit.js https://js-cdn.music.apple.com/musickit/v3/musickit.js
+ */
+const MUSICKIT_SOURCES = [
+  'https://js-cdn.music.apple.com/musickit/v3/musickit.js',
+  '/musickit.js',
+];
 
 declare global {
   interface Window {
@@ -18,6 +27,47 @@ declare global {
  * The iOS/iPadOS counterpart is the M0 native module (Expo Modules API);
  * AppleMusicProvider.ts is its placeholder.
  */
+/** Load one MusicKit source and wait until the global is genuinely ready. */
+function loadMusicKitScript(src: string, ready: () => boolean): Promise<void> {
+  // Remove any corpse from a previous failed attempt so a retry
+  // genuinely re-requests the script.
+  document.querySelectorAll(`script[data-musickit]`).forEach((el) => el.remove());
+
+  return new Promise<void>((resolve, reject) => {
+    const script = document.createElement('script');
+    const finish = () => {
+      document.removeEventListener('musickitloaded', onLoaded);
+      clearInterval(poll);
+      clearTimeout(timer);
+    };
+    const onLoaded = () => {
+      finish();
+      resolve();
+    };
+    document.addEventListener('musickitloaded', onLoaded, { once: true });
+    script.src = src;
+    script.async = true;
+    script.setAttribute('data-musickit', '1');
+    script.onerror = () => {
+      finish();
+      script.remove();
+      reject(new Error(`${src}: request failed (blocked or offline)`));
+    };
+    document.head.appendChild(script);
+    const poll = setInterval(() => {
+      if (ready()) {
+        finish();
+        resolve();
+      }
+    }, 100);
+    const timer = setTimeout(() => {
+      finish();
+      script.remove();
+      reject(new Error(`${src}: loaded but MusicKit never became ready (neutered by a blocker/proxy?)`));
+    }, 12_000);
+  });
+}
+
 export class AppleMusicProvider implements MusicProvider {
   readonly name = 'apple-musickit-js';
 
@@ -48,52 +98,22 @@ export class AppleMusicProvider implements MusicProvider {
       Boolean(window.MusicKit && typeof (window.MusicKit as any).configure === 'function');
 
     if (!ready()) {
-      // Remove any corpse from a previous failed attempt so a retry
-      // genuinely re-requests the script.
-      document
-        .querySelectorAll(`script[src="${MUSICKIT_JS_URL}"]`)
-        .forEach((el) => el.remove());
-
-      await new Promise<void>((resolve, reject) => {
-        const script = document.createElement('script');
-        const finish = () => {
-          document.removeEventListener('musickitloaded', onLoaded);
-          clearInterval(poll);
-          clearTimeout(timer);
-        };
-        const onLoaded = () => {
-          finish();
-          resolve();
-        };
-        document.addEventListener('musickitloaded', onLoaded, { once: true });
-        script.src = MUSICKIT_JS_URL;
-        script.async = true;
-        script.onerror = () => {
-          finish();
-          script.remove();
-          reject(
-            new Error(
-              `MusicKit JS failed to load from ${MUSICKIT_JS_URL} — check the browser Network tab (content blocker / firewall?)`,
-            ),
-          );
-        };
-        document.head.appendChild(script);
-        const poll = setInterval(() => {
-          if (ready()) {
-            finish();
-            resolve();
-          }
-        }, 100);
-        const timer = setTimeout(() => {
-          finish();
-          script.remove();
-          reject(
-            new Error(
-              'MusicKit JS loaded but never became ready within 15s — try a hard refresh; if it persists, check the Console for CSP or blocker messages',
-            ),
-          );
-        }, 15_000);
-      });
+      const failures: string[] = [];
+      for (const src of MUSICKIT_SOURCES) {
+        try {
+          await loadMusicKitScript(src, ready);
+          console.log(`[tots] MusicKit ready via ${src}`);
+          break;
+        } catch (err: any) {
+          failures.push(err?.message ?? String(err));
+        }
+      }
+      if (!ready()) {
+        throw new Error(
+          `MusicKit could not initialize from any source.\n- ${failures.join('\n- ')}\n` +
+            'Self-host fix: curl -o public/musickit.js https://js-cdn.music.apple.com/musickit/v3/musickit.js && restart',
+        );
+      }
     }
 
     this.instance = await (window.MusicKit as any).configure({
