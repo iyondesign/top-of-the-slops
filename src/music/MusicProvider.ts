@@ -43,6 +43,12 @@ export interface MusicProvider {
   /** Current playback position in ms, or null if idle. */
   position(): number | null;
 
+  /**
+   * Local mute — the live channel never pauses (everyone stays in sync);
+   * you silence YOUR radio. Playback and the clock keep running.
+   */
+  setMuted?(muted: boolean): void;
+
   /** Tear down audio resources. */
   destroy(): void;
 }

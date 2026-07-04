@@ -119,8 +119,34 @@ export class StubChannel {
       ...this.pool,
       { ...track, durationMs: Math.min(track.durationMs || STUB_TRACK_DURATION_MS, STUB_TRACK_DURATION_MS) },
     ];
+    this.addedAtMs.set(track.id, Date.now());
     this.trackListeners.forEach((l) => l(this.pool));
     return true;
+  }
+
+  private addedAtMs = new Map<string, number>();
+
+  /**
+   * The room's queue view: what the rotation will play next, in pool
+   * order from the current track. (Hype-to-replay can occasionally jump
+   * this — it's a live radio, not a locked tracklist.) In M2 this is
+   * derived server-side from meta.poolTrackIds + recentPlays.
+   */
+  getUpNext(count = 8): Track[] {
+    const n = this.pool.length;
+    if (n === 0) return [];
+    const out: Track[] = [];
+    for (let step = 1; step <= n && out.length < count; step++) {
+      const track = this.pool[(this.poolIndex + step) % n];
+      if (track.id !== this.state?.currentTrackId) out.push(track);
+    }
+    return out;
+  }
+
+  /** Was this track contributed in the last few minutes? (NEW badge) */
+  isRecentlyAdded(trackId: string, windowMs = 5 * 60_000): boolean {
+    const at = this.addedAtMs.get(trackId);
+    return at !== undefined && Date.now() - at < windowMs;
   }
 
   onState(listener: Listener<ChannelState>): () => void {

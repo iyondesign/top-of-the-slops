@@ -31,9 +31,23 @@ import { PressableScale } from '../ui/PressableScale';
  * once a developer token is set) and search the catalog to feed your
  * favorites into the shared candidate pool the conductor plays for
  * everyone (plan §8 — favorites feed the pool, not a private playlist).
+ *
+ * AddToPool = nav trigger + sheet; AddToPoolSheet is also opened by the
+ * Room's "Request a song" (live-radio request line).
  */
 export function AddToPool() {
   const [open, setOpen] = useState(false);
+  return (
+    <>
+      <PressableScale style={styles.trigger} onPress={() => setOpen(true)}>
+        <Text style={styles.triggerText}>＋ Add a banger</Text>
+      </PressableScale>
+      <AddToPoolSheet open={open} onClose={() => setOpen(false)} />
+    </>
+  );
+}
+
+export function AddToPoolSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Track[]>([]);
   const [searching, setSearching] = useState(false);
@@ -112,18 +126,13 @@ export function AddToPool() {
           : '🍎 Apple Music — not configured yet';
 
   return (
-    <>
-      <PressableScale style={styles.trigger} onPress={() => setOpen(true)}>
-        <Text style={styles.triggerText}>＋ Add a banger</Text>
-      </PressableScale>
-
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setOpen(false)}>
-          <Pressable onPress={() => {}} style={styles.sheetWrap}>
+    <Modal visible={open} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.backdrop} onPress={onClose}>
+        <Pressable onPress={() => {}} style={styles.sheetWrap}>
             <GlassPanel style={styles.sheet}>
               <View style={styles.header}>
                 <Text style={styles.title}>Feed the channel</Text>
-                <Pressable onPress={() => setOpen(false)} hitSlop={10}>
+                <Pressable onPress={onClose} hitSlop={10}>
                   <Text style={styles.close}>✕</Text>
                 </Pressable>
               </View>
@@ -277,10 +286,9 @@ export function AddToPool() {
                 )}
               </ScrollView>
             </GlassPanel>
-          </Pressable>
         </Pressable>
-      </Modal>
-    </>
+      </Pressable>
+    </Modal>
   );
 }
 

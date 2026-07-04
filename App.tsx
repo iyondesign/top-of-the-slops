@@ -44,7 +44,7 @@ export default function App() {
   const state = useChannelState();
   const track = useCurrentTrack(state);
   const { profile, update, link } = useIdentity();
-  const { enabled, enable } = usePlayback(state, config);
+  const { enabled, enable, muted, toggleMute } = usePlayback(state, config);
   const tint = useArtworkTint(track?.artworkUrl);
 
   useEffect(() => {
@@ -79,6 +79,14 @@ export default function App() {
           {!enabled && config.isLive && state && (
             <PressableScale style={styles.tuneIn} onPress={enable}>
               <Text style={styles.tuneInText}>▶ Tune in</Text>
+            </PressableScale>
+          )}
+          {enabled && (
+            <PressableScale
+              style={StyleSheet.flatten([styles.muteButton, muted && styles.muteButtonMuted])}
+              onPress={toggleMute}
+            >
+              <Text style={styles.muteIcon}>{muted ? '🔇' : '🔊'}</Text>
             </PressableScale>
           )}
           {isDesktop && <AddToPool />}
@@ -130,6 +138,18 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
   },
   tuneInText: { color: '#FFFFFF', fontFamily: fonts.display, fontSize: type.caption },
+  muteButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.glassFill,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  muteButtonMuted: { borderColor: colors.accent, backgroundColor: colors.accentSoft },
+  muteIcon: { fontSize: 15 },
   desktopBody: {
     flex: 1,
     flexDirection: 'row',

@@ -11,6 +11,29 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.14.0] — 2026-07-04 — Live-radio controls: mute + On Deck room queue
+
+### Added
+- **Mute/unmute, not play/pause** — the broadcast never pauses (everyone
+  stays in sync); the nav's Tune-in slot becomes a 🔊/🔇 toggle that
+  silences YOUR radio while the channel clock keeps running. Wired through
+  both providers (`setMuted` on MusicKit volume + preview audio).
+- **On Deck** — room-level queue popover from the ☰ button beside Send:
+  what the shared pool plays next (same order for every listener — it's
+  room state, conductor-derived in M2), NEW badges on tracks contributed
+  in the last 5 minutes, and the live-radio caveat that 🔥/💩 can shuffle
+  the order.
+- **＋ Request a song** in On Deck — opens the library/playlists/search
+  picker (AddToPool refactored into a reusable controlled sheet), so any
+  listener can call in a request like a radio request line.
+- Stub conductor: `getUpNext` (rotation order) + recently-added tracking;
+  `channelClient.getUpNext`/`isRecentlyAdded` with the M2 seam noted.
+
+### Versioning
+- Manifests bumped to `0.14.0`.
+
+---
+
 ## [0.13.0] — 2026-07-04 — Browse your music: Recents · Playlists · A–Z
 
 ### Added

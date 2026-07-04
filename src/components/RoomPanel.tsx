@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Image,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,7 +12,14 @@ import {
 } from 'react-native';
 
 import { sendChatMessage, subscribeChat } from '../chat/chatClient';
-import { subscribeLeaderboards } from '../channel/channelClient';
+import {
+  getUpNext,
+  isRecentlyAdded,
+  subscribeChannelState,
+  subscribeLeaderboards,
+  subscribeTrackPool,
+} from '../channel/channelClient';
+import { AddToPoolSheet } from './AddToPool';
 import { colors, fonts, radius, space, type } from '../theme';
 import type {
   AppConfig,
@@ -63,13 +71,104 @@ export function RoomPanel({ profile, config, state }: Props) {
       </View>
 
       {tab === 'chat' ? (
-        <ChatView profile={profile} config={config} />
+        <ChatView profile={profile} config={config} state={state} />
       ) : tab === 'tracks' ? (
         <TrackBoard boards={boards} />
       ) : (
         <TastemakerBoard boards={boards} profile={profile} />
       )}
     </GlassPanel>
+  );
+}
+
+// ---------------------------------------------------------- on deck ----
+
+/**
+ * Room-level options popover (the button beside Send): live-radio "On
+ * Deck" — what the room plays next from the shared pool (visible to
+ * every listener; stored at room level) — plus the request line into
+ * the library/playlist picker.
+ */
+function OnDeckPopover({
+  open,
+  onClose,
+  onRequestSong,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onRequestSong: () => void;
+}) {
+  const [upNext, setUpNext] = useState(() => getUpNext(8));
+
+  // Refresh whenever the rotation advances or the pool changes.
+  useEffect(() => {
+    if (!open) return;
+    const offState = subscribeChannelState(() => setUpNext(getUpNext(8)));
+    const offPool = subscribeTrackPool(() => setUpNext(getUpNext(8)));
+    return () => {
+      offState();
+      offPool();
+    };
+  }, [open]);
+
+  return (
+    <Modal visible={open} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.deckBackdrop} onPress={onClose}>
+        <Pressable onPress={() => {}} style={styles.deckWrap}>
+          <GlassPanel style={styles.deckSheet}>
+            <View style={styles.deckHeader}>
+              <Text style={styles.deckTitle}>On Deck</Text>
+              <Text style={styles.deckMeta}>ROOM QUEUE · TOTS•01</Text>
+            </View>
+            <ScrollView style={{ maxHeight: 300 }}>
+              {upNext.length === 0 ? (
+                <Text style={styles.deckEmpty}>
+                  Queue syncs from the conductor once the room goes live.
+                </Text>
+              ) : (
+                upNext.map((track, i) => (
+                  <View key={track.id} style={styles.deckRow}>
+                    <Text style={styles.deckRank}>{i + 1}</Text>
+                    {track.artworkUrl ? (
+                      <Image source={{ uri: track.artworkUrl }} style={styles.deckArt} />
+                    ) : (
+                      <View style={[styles.deckArt, styles.deckArtFallback]}>
+                        <Text>💿</Text>
+                      </View>
+                    )}
+                    <View style={styles.deckBody}>
+                      <Text style={styles.deckTrack} numberOfLines={1}>
+                        {track.title}
+                      </Text>
+                      <Text style={styles.deckArtist} numberOfLines={1}>
+                        {track.artist}
+                      </Text>
+                    </View>
+                    {isRecentlyAdded(track.id) && (
+                      <View style={styles.newBadge}>
+                        <Text style={styles.newBadgeText}>NEW</Text>
+                      </View>
+                    )}
+                  </View>
+                ))
+              )}
+            </ScrollView>
+            <Text style={styles.deckHint}>
+              Pool order — 🔥 hype and 💩 boos can shuffle it. It's live radio.
+            </Text>
+            <PressableScale
+              style={styles.requestButton}
+              onPress={() => {
+                onClose();
+                onRequestSong();
+              }}
+            >
+              <Text style={styles.requestText}>＋ Request a song</Text>
+            </PressableScale>
+          </GlassPanel>
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }
 
@@ -101,12 +200,23 @@ function MessageEnter({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ChatView({ profile, config }: { profile: UserProfile | null; config: AppConfig }) {
+function ChatView({
+  profile,
+  config,
+  state,
+}: {
+  profile: UserProfile | null;
+  config: AppConfig;
+  state: ChannelState | null;
+}) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
   const [muted, setMuted] = useState<Set<string>>(new Set());
+  const [deckOpen, setDeckOpen] = useState(false);
+  const [requestOpen, setRequestOpen] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+  void state;
 
   useEffect(() => subscribeChat(setMessages), []);
   useEffect(() => {
@@ -195,6 +305,9 @@ function ChatView({ profile, config }: { profile: UserProfile | null; config: Ap
           onSubmitEditing={send}
           blurOnSubmit={false}
         />
+        <PressableScale style={styles.deckButton} onPress={() => setDeckOpen(true)}>
+          <Text style={styles.deckButtonIcon}>☰</Text>
+        </PressableScale>
         <PressableScale
           style={StyleSheet.flatten([styles.sendButton, !draft.trim() && styles.sendDisabled])}
           onPress={send}
@@ -202,6 +315,13 @@ function ChatView({ profile, config }: { profile: UserProfile | null; config: Ap
           <Text style={styles.sendText}>↑</Text>
         </PressableScale>
       </View>
+
+      <OnDeckPopover
+        open={deckOpen}
+        onClose={() => setDeckOpen(false)}
+        onRequestSong={() => setRequestOpen(true)}
+      />
+      <AddToPoolSheet open={requestOpen} onClose={() => setRequestOpen(false)} />
     </>
   );
 }
@@ -338,6 +458,86 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     fontSize: type.caption,
   },
+  deckButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.bgSunken,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deckButtonIcon: { color: colors.textDim, fontSize: 15 },
+  deckBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: space.lg,
+  },
+  deckWrap: { width: '100%', maxWidth: 400 },
+  deckSheet: { padding: space.md },
+  deckHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: space.sm,
+  },
+  deckTitle: { color: colors.text, fontSize: type.title, fontFamily: fonts.display },
+  deckMeta: {
+    color: colors.telemetry,
+    fontSize: type.micro,
+    fontFamily: fonts.mono,
+    letterSpacing: 1,
+  },
+  deckRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    paddingVertical: space.xs + 2,
+  },
+  deckRank: { color: colors.textFaint, fontSize: type.caption, fontFamily: fonts.mono, width: 18 },
+  deckArt: { width: 36, height: 36, borderRadius: 8 },
+  deckArtFallback: {
+    backgroundColor: colors.bgSunken,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deckBody: { flex: 1, minWidth: 0 },
+  deckTrack: { color: colors.text, fontSize: type.caption, fontWeight: '700' },
+  deckArtist: { color: colors.textFaint, fontSize: type.micro },
+  newBadge: {
+    backgroundColor: colors.accentSoft,
+    borderRadius: radius.sm - 2,
+    paddingHorizontal: space.xs + 2,
+    paddingVertical: 2,
+  },
+  newBadgeText: {
+    color: colors.accent,
+    fontSize: 9,
+    fontFamily: fonts.mono,
+    letterSpacing: 1,
+  },
+  deckEmpty: {
+    color: colors.textFaint,
+    fontSize: type.caption,
+    textAlign: 'center',
+    paddingVertical: space.md,
+  },
+  deckHint: {
+    color: colors.textFaint,
+    fontSize: type.micro,
+    marginTop: space.sm,
+    marginBottom: space.sm,
+  },
+  requestButton: {
+    backgroundColor: colors.accent,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    paddingVertical: space.sm + 2,
+  },
+  requestText: { color: '#FFFFFF', fontFamily: fonts.display, fontSize: type.caption },
   sendButton: {
     width: 34,
     height: 34,

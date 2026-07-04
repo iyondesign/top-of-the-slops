@@ -111,5 +111,17 @@ export function usePlayback(state: ChannelState | null, config: AppConfig) {
     void syncTo();
   }, [syncTo]);
 
-  return { enabled, enable };
+  // Mute is LOCAL: the broadcast never pauses (the room stays in sync);
+  // you silence your own radio. The clock keeps running.
+  const [muted, setMuted] = useState(false);
+  const toggleMute = useCallback(() => {
+    setMuted((current) => {
+      const next = !current;
+      machine.current.provider.setMuted?.(next);
+      machine.current.preview.setMuted?.(next);
+      return next;
+    });
+  }, []);
+
+  return { enabled, enable, muted, toggleMute };
 }

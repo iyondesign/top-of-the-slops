@@ -15,6 +15,7 @@ export class PreviewMusicProvider implements MusicProvider {
   /** Silent-clock fallback for platforms without HTMLAudioElement. */
   private clockStartedAt: number | null = null;
   private clockOffsetMs = 0;
+  private muted = false;
   private tracks: Map<string, Track>;
 
   constructor(tracks: Track[] = []) {
@@ -62,6 +63,7 @@ export class PreviewMusicProvider implements MusicProvider {
         this.audio = new Audio(previewUrl);
         this.audio.loop = true;
       }
+      this.audio.muted = this.muted;
       this.audio.currentTime = previewPositionMs / 1000;
       await this.audio.play();
     }
@@ -86,6 +88,11 @@ export class PreviewMusicProvider implements MusicProvider {
   position(): number | null {
     if (this.clockStartedAt === null) return null;
     return this.clockOffsetMs + (Date.now() - this.clockStartedAt);
+  }
+
+  setMuted(muted: boolean): void {
+    this.muted = muted;
+    if (this.audio) this.audio.muted = muted;
   }
 
   destroy(): void {

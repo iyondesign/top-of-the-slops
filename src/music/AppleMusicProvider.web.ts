@@ -133,8 +133,21 @@ export class AppleMusicProvider implements MusicProvider {
 
   private instance: any = null;
   private loading: Promise<any> | null = null;
+  private muted = false;
+  private savedVolume = 1;
 
   constructor(private developerToken: string) {}
+
+  setMuted(muted: boolean): void {
+    this.muted = muted;
+    if (!this.instance) return;
+    if (muted) {
+      this.savedVolume = this.instance.volume ?? 1;
+      this.instance.volume = 0;
+    } else {
+      this.instance.volume = this.savedVolume || 1;
+    }
+  }
 
   private music(): Promise<any> {
     // Single in-flight bootstrap; reset on failure so a retry is possible.
@@ -297,6 +310,7 @@ export class AppleMusicProvider implements MusicProvider {
   async play(trackId: string, positionMs: number): Promise<void> {
     const music = await this.music();
     await music.setQueue({ song: trackId });
+    if (this.muted) music.volume = 0;
     await music.play();
     if (positionMs > 0) await music.seekToTime(positionMs / 1000);
   }

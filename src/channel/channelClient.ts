@@ -68,6 +68,21 @@ export function addToPool(track: Track): boolean {
   return stubChannel.addToPool(track);
 }
 
+/**
+ * The room's up-next queue (pool rotation order from the current track).
+ * Room-level state: every listener sees the same order. In live mode
+ * (M2) this derives from the conductor's meta.poolTrackIds +
+ * recentPlays; until that lands the live transport reports none.
+ */
+export function getUpNext(count = 8): Track[] {
+  return isLiveBackend() ? [] : stubChannel.getUpNext(count);
+}
+
+/** NEW badge: was this track contributed in the last few minutes? */
+export function isRecentlyAdded(trackId: string): boolean {
+  return !isLiveBackend() && stubChannel.isRecentlyAdded(trackId);
+}
+
 /** The one shared clock (RTDB /.info/serverTimeOffset in M2). */
 export function serverNow(): number {
   return transport.serverNow();
