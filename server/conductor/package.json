@@ -1,6 +1,6 @@
 {
   "name": "tots-conductor",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "private": true,
   "description": "TOTS channel conductor — singleton Cloud Run service that owns /channels/global/state",
   "main": "dist/index.js",

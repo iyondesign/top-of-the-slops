@@ -43,7 +43,7 @@ export default function App() {
   const config = useAppConfig();
   const state = useChannelState();
   const track = useCurrentTrack(state);
-  const { profile, update } = useIdentity();
+  const { profile, update, link } = useIdentity();
   const { enabled, enable } = usePlayback(state, config);
   const tint = useArtworkTint(track?.artworkUrl);
 
@@ -82,7 +82,7 @@ export default function App() {
             </PressableScale>
           )}
           {isDesktop && <AddToPool />}
-          {profile && <ProfileEditor profile={profile} onUpdate={update} />}
+          {profile && <ProfileEditor profile={profile} onUpdate={update} onLink={link} />}
         </View>
       </View>
 

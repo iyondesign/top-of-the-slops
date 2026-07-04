@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { loadOrCreateProfile, updateProfile } from '../identity/identity';
+import {
+  linkWithApple,
+  linkWithEmail,
+  linkWithGoogle,
+  type AuthProviderId,
+  type LinkResult,
+} from '../identity/authProviders';
+import { loadOrCreateProfile, persistLinkedProfile, updateProfile } from '../identity/identity';
 import type { UserProfile } from '../types';
 
 export function useIdentity() {
@@ -27,5 +34,36 @@ export function useIdentity() {
     [profile],
   );
 
-  return { profile, update };
+  /**
+   * Keep your cred: attach a real identity (iCloud / Google / email) to
+   * the anonymous session. On success the profile stops being anonymous;
+   * if the identity owned an existing account, the uid follows it.
+   */
+  const link = useCallback(
+    async (
+      provider: AuthProviderId,
+      creds?: { email: string; password: string },
+    ): Promise<LinkResult> => {
+      if (!profile) return { ok: false, reason: 'no-session' };
+      const result =
+        provider === 'apple'
+          ? await linkWithApple()
+          : provider === 'google'
+            ? await linkWithGoogle()
+            : await linkWithEmail(creds?.email ?? '', creds?.password ?? '');
+      if (result.ok) {
+        const next: UserProfile = {
+          ...profile,
+          uid: result.uid ?? profile.uid,
+          isAnonymous: false,
+        };
+        await persistLinkedProfile(next);
+        setProfile(next);
+      }
+      return result;
+    },
+    [profile],
+  );
+
+  return { profile, update, link };
 }

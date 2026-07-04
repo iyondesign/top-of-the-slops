@@ -91,6 +91,11 @@ export async function updateProfile(
   return next;
 }
 
+/** Persist the post-link profile (no longer anonymous; uid may change). */
+export async function persistLinkedProfile(profile: UserProfile): Promise<void> {
+  await persistLocal(profile);
+}
+
 async function readStoredProfile(): Promise<UserProfile | null> {
   try {
     const raw = await AsyncStorage.getItem(STORAGE_KEY);

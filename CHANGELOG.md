@@ -11,6 +11,31 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.10.0] — 2026-07-04 — Progressive auth: iCloud / Google / email on Firebase
+
+### Added
+- **"Keep your cred"** in the profile sheet: attach a real identity to the
+  anonymous session — **Sign in with Apple (iCloud)**, **Google**, or a
+  **direct email/password account** — all on Firebase Auth (Google
+  infrastructure). Credentials are **linked onto the anonymous uid**
+  (`linkWith*`) so votes, handle, and tastemaker score survive; if the
+  identity already owns an account, we sign into it and the profile follows
+  (credential-already-in-use fallback). Web popup flows now; native arrives
+  with the M0 dev build. Graceful "not configured" state until the Firebase
+  project is wired. → `src/identity/authProviders.ts`,
+  `useIdentity().link`, `ProfileEditor`
+- **`docs/SETUP-TODO.md`** — the two pending credentials (Apple developer
+  token ⏳ account pending; Firebase web config ⏳), exact setup steps, and
+  the security ground rules (web config is shareable; service-account JSON,
+  `.p8` keys, and Gemini keys are never pasted in chat / committed).
+- **`scripts/mint-apple-developer-token.mjs`** — zero-dependency ES256 JWT
+  minting from the MusicKit `.p8` (key never leaves your machine).
+
+### Versioning
+- Manifests bumped to `0.10.0`.
+
+---
+
 ## [0.9.0] — 2026-07-04 — Connect Apple Music + feed the pool
 
 ### Added
