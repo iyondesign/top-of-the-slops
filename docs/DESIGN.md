@@ -136,8 +136,11 @@ anchors the waveform's left end, 💩 anchors the right; 27 bars animate their
 heights while the channel plays. **Lit length = playback progress; within
 the lit region the fire gradient floods from the left and slop from the
 right — the crossover is the vote split.** Before any votes land, the lit
-region sings in spectrum color. Underneath, one telemetry row: timecode ·
-vote hint (ONE CALL PER PLAY / BANGER, CALLED) · channel bug. The Tune In
+region sings in spectrum color. When both camps have votes, the crossover
+grows a **contested seam** — a 3px breathing sliver of white light (glow =
+the fire↔slop midpoint color, pulse 1.1s, sliding on a spring as the split
+shifts). Underneath, one telemetry row: timecode · vote hint (ONE CALL PER
+PLAY / BANGER, CALLED) · channel bug. The Tune In
 CTA lives in the global nav (left of the profile chip), keeping the stage
 clear.
 

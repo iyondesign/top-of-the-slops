@@ -88,6 +88,7 @@ export function VotePlaybackBar({ state, profile, width }: Props) {
               isPlaying={state.isPlaying}
               fireShare={fireShare}
               hasVotes={total > 0}
+              contested={state.liveFireCount > 0 && state.liveSlopCount > 0}
             />
           )}
         </View>

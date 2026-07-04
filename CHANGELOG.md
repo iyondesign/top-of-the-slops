@@ -11,6 +11,17 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.8.1] — 2026-07-04 — The contested seam
+
+### Added
+- When **both camps have votes**, the smart bar's crossover grows a
+  contested seam: a 3px breathing sliver of white light (1.1s pulse, glow
+  in the fire↔slop midpoint color) that slides on a spring as the vote
+  split shifts — the fight, visible. → `Waveform` `contested` prop, wired
+  from `VotePlaybackBar`; design-system hero card + DESIGN.md updated.
+
+---
+
 ## [0.8.0] — 2026-07-04 — VotePlaybackBar: playback + votes as one smart line
 
 ### Added
