@@ -11,14 +11,24 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.8.4] — 2026-07-04 — Remove the rotating gloss sheen
+
+### Changed
+- Dropped the disc gloss sheen added in 0.8.3. The record still spins with
+  momentum and an asymmetric label. → `src/components/VinylHero.tsx`
+
+### Versioning
+- Manifests bumped to `0.8.4`.
+
+---
+
 ## [0.8.3] — 2026-07-04 — The record spins like a record
 
 ### Changed
 - Vinyl rotation reworked with **momentum**: accumulating-angle spin so the
   platter **spins up** (ease-in from rest) when playback starts and
   **coasts to a stop** (ease-out) when it pauses, instead of snapping on/off.
-- Added a **rotating gloss sheen** fixed to the disc (sweeps as it turns)
-  and an **asymmetric label** (dominant-tint smear + artist initial) for
+- Added an **asymmetric label** (dominant-tint smear + artist initial) for
   artwork-less tracks — so the spin reads clearly even before real album
   art loads. Real artwork rotates as the label, as it always did.
   → `src/components/VinylHero.tsx`

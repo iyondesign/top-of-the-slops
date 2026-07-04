@@ -173,19 +173,6 @@ export function VinylHero({ state, track, size, profile, tint }: Props) {
               </View>
             )}
           </View>
-          {/* glossy studio sheen — fixed to the disc, sweeps as it turns */}
-          <View
-            pointerEvents="none"
-            style={[
-              styles.sheen,
-              {
-                width: size * 1.1,
-                height: size * 0.34,
-                top: size * 0.12,
-                left: -size * 0.05,
-              },
-            ]}
-          />
           <View style={[styles.spindle, { borderColor: tint }]} />
         </Animated.View>
       </Animated.View>
@@ -224,7 +211,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: colors.vinylGroove,
-    overflow: 'hidden',
   },
   groove: {
     position: 'absolute',
@@ -245,12 +231,6 @@ const styles = StyleSheet.create({
   labelChar: {
     color: colors.text,
     fontFamily: fonts.display,
-  },
-  sheen: {
-    position: 'absolute',
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderRadius: 999,
-    transform: [{ rotate: '-24deg' }],
   },
   spindle: {
     position: 'absolute',
