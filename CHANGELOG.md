@@ -11,6 +11,19 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.8.2] — 2026-07-04 — ON AIR moves to the nav
+
+### Changed
+- **ON AIR badge moved from the hero into the global nav**, right of the
+  logo (new `OnAirBadge` component — keeps the pulsing lamp + long-press
+  off-air toggle; shows only while `isLive`). The hero now opens straight
+  on the record.
+- **Removed the `TOTS•01` nav badge** (the channel bug still rides the
+  smart bar's telemetry row).
+- Design-system chrome card updated to the new nav lockup.
+
+---
+
 ## [0.8.1] — 2026-07-04 — The contested seam
 
 ### Added

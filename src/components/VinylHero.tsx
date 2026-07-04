@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Image, StyleSheet, Text, View } from 'react-native';
 
-import { devSetAppConfig, subscribeBooedOff } from '../channel/channelClient';
+import { subscribeBooedOff } from '../channel/channelClient';
 import { colors, fonts, motion, radius, space, type } from '../theme';
 import type { ChannelState, Track, UserProfile } from '../types';
 import { VotePlaybackBar } from './VotePlaybackBar';
@@ -23,7 +23,6 @@ interface Props {
  */
 export function VinylHero({ state, track, size, profile, tint }: Props) {
   const spin = useRef(new Animated.Value(0)).current;
-  const lamp = useRef(new Animated.Value(1)).current;
   const drop = useRef(new Animated.Value(1)).current;
   const [booed, setBooed] = useState<Track | null>(null);
 
@@ -49,17 +48,6 @@ export function VinylHero({ state, track, size, profile, tint }: Props) {
     return () => loop.stop();
   }, [state.isPlaying]);
 
-  useEffect(() => {
-    const pulse = Animated.loop(
-      Animated.sequence([
-        Animated.timing(lamp, { toValue: 0.5, duration: motion.onAirPulse / 2, useNativeDriver: true }),
-        Animated.timing(lamp, { toValue: 1, duration: motion.onAirPulse / 2, useNativeDriver: true }),
-      ]),
-    );
-    pulse.start();
-    return () => pulse.stop();
-  }, []);
-
   // Needle drop: each new track lands with a spring.
   useEffect(() => {
     drop.setValue(0.94);
@@ -71,14 +59,6 @@ export function VinylHero({ state, track, size, profile, tint }: Props) {
 
   return (
     <View style={styles.container}>
-      <Pressable
-        onLongPress={() => devSetAppConfig({ isLive: false })}
-        style={styles.livePill}
-      >
-        <Animated.View style={[styles.liveDot, { opacity: lamp }]} />
-        <Text style={styles.liveText}>ON AIR</Text>
-      </Pressable>
-
       <Animated.View
         style={{
           width: size,
@@ -153,25 +133,6 @@ export function VinylHero({ state, track, size, profile, tint }: Props) {
 
 const styles = StyleSheet.create({
   container: { alignItems: 'center', gap: space.md },
-  livePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: colors.accentSoft,
-    borderColor: colors.live,
-    borderWidth: 1,
-    paddingHorizontal: space.md,
-    paddingVertical: 6,
-    borderRadius: radius.full,
-  },
-  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.live },
-  liveText: {
-    color: colors.live,
-    fontWeight: '800',
-    fontSize: 11,
-    letterSpacing: 3,
-    fontFamily: fonts.mono,
-  },
   glow: {
     position: 'absolute',
     opacity: 0.1,

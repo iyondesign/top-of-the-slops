@@ -19,6 +19,7 @@ import { attachPresence } from './src/channel/channelClient';
 import { AmbientBackdrop } from './src/components/AmbientBackdrop';
 import { Logo } from './src/components/Logo';
 import { OffAirCard } from './src/components/OffAirCard';
+import { OnAirBadge } from './src/components/OnAirBadge';
 import { ProfileEditor } from './src/components/ProfileEditor';
 import { RoomPanel } from './src/components/RoomPanel';
 import { VinylHero } from './src/components/VinylHero';
@@ -71,9 +72,7 @@ export default function App() {
       <View style={styles.topBar}>
         <View style={styles.brand}>
           <Logo size={26} />
-          <View style={styles.channelBug}>
-            <Text style={styles.channelBugText}>TOTS•01</Text>
-          </View>
+          {config.isLive && <OnAirBadge />}
         </View>
         <View style={styles.navRight}>
           {!enabled && config.isLive && state && (
@@ -128,20 +127,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
   },
   tuneInText: { color: '#FFFFFF', fontFamily: fonts.display, fontSize: type.caption },
-  channelBug: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.bgSunken,
-    borderRadius: radius.sm - 2,
-    paddingHorizontal: space.sm,
-    paddingVertical: 3,
-  },
-  channelBugText: {
-    color: colors.telemetry,
-    fontSize: type.micro,
-    fontFamily: fonts.mono,
-    letterSpacing: 2,
-  },
   desktopBody: {
     flex: 1,
     flexDirection: 'row',
