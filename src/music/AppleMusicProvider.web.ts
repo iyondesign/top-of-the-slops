@@ -22,27 +22,68 @@ export class AppleMusicProvider implements MusicProvider {
   readonly name = 'apple-musickit-js';
 
   private instance: any = null;
+  private loading: Promise<any> | null = null;
 
   constructor(private developerToken: string) {}
 
-  private async music(): Promise<any> {
-    if (this.instance) return this.instance;
+  private music(): Promise<any> {
+    // Single in-flight bootstrap; reset on failure so a retry is possible.
+    this.loading ??= this.bootstrap().catch((err) => {
+      this.loading = null;
+      throw err;
+    });
+    return this.loading;
+  }
+
+  private async bootstrap(): Promise<any> {
     if (typeof document === 'undefined') {
       throw new Error('MusicKit JS requires a browser environment');
     }
-    if (!window.MusicKit) {
-      await new Promise<void>((resolve, reject) => {
+
+    // MusicKit v3 attaches `configure` AFTER its own async setup — the
+    // script's onload fires too early, and the global can briefly exist
+    // as a namespace without configure. The documented signal is the
+    // `musickitloaded` event; we also poll as a belt-and-suspenders.
+    const ready = () =>
+      Boolean(window.MusicKit && typeof (window.MusicKit as any).configure === 'function');
+
+    if (!ready()) {
+      if (!document.querySelector(`script[src="${MUSICKIT_JS_URL}"]`)) {
         const script = document.createElement('script');
         script.src = MUSICKIT_JS_URL;
         script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error('Failed to load MusicKit JS'));
+        script.onerror = () => {
+          // surfaced by the timeout below
+        };
         document.head.appendChild(script);
+      }
+      await new Promise<void>((resolve, reject) => {
+        const finish = () => {
+          document.removeEventListener('musickitloaded', onLoaded);
+          clearInterval(poll);
+          clearTimeout(timer);
+        };
+        const onLoaded = () => {
+          finish();
+          resolve();
+        };
+        document.addEventListener('musickitloaded', onLoaded, { once: true });
+        const poll = setInterval(() => {
+          if (ready()) {
+            finish();
+            resolve();
+          }
+        }, 100);
+        const timer = setTimeout(() => {
+          finish();
+          reject(new Error('MusicKit JS did not become ready (script blocked or offline?)'));
+        }, 15_000);
       });
     }
-    this.instance = await window.MusicKit!.configure({
+
+    this.instance = await (window.MusicKit as any).configure({
       developerToken: this.developerToken,
-      app: { name: 'Top of the Slops', build: '0.1.0' },
+      app: { name: 'Top of the Slops', build: '0.12.0' },
     });
     return this.instance;
   }
@@ -138,6 +179,7 @@ export class AppleMusicProvider implements MusicProvider {
   destroy(): void {
     this.instance?.stop?.();
     this.instance = null;
+    this.loading = null;
   }
 }
 
