@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { serverNow, subscribeTrackPool } from '../channel/channelClient';
-import { createMusicProvider, DRIFT_TOLERANCE_MS } from '../music';
+import { DRIFT_TOLERANCE_MS, getMusicMachine } from '../music';
 import type { AppConfig, ChannelState } from '../types';
 
 /**
@@ -14,7 +14,7 @@ import type { AppConfig, ChannelState } from '../types';
  */
 export function usePlayback(state: ChannelState | null, config: AppConfig) {
   const [enabled, setEnabled] = useState(false);
-  const machine = useRef(createMusicProvider());
+  const machine = useRef(getMusicMachine());
 
   // Keep the preview provider's track table in sync with the pool.
   useEffect(
@@ -51,7 +51,8 @@ export function usePlayback(state: ChannelState | null, config: AppConfig) {
     };
   }, [enabled, config.isLive, state?.currentTrackId, state?.startedAtServerMs, state?.isPlaying]);
 
-  useEffect(() => () => machine.current.provider.destroy(), []);
+  // The provider is a shared singleton (also driven by the connect flow),
+  // so playback does not destroy it on unmount.
 
   return { enabled, enable: () => setEnabled(true) };
 }

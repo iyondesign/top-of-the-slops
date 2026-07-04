@@ -104,6 +104,20 @@ export class StubChannel {
     return this.pool;
   }
 
+  /**
+   * A listener adds a favorite to the shared candidate pool (plan §8:
+   * favorites feed the curated pool the conductor plays for everyone).
+   * In M2 this becomes a write to /channels/global/meta.poolTrackIds
+   * behind admin guardrails; here it grows the local rotation live.
+   * Returns false if the track is already in the pool.
+   */
+  addToPool(track: Track): boolean {
+    if (this.pool.some((t) => t.id === track.id)) return false;
+    this.pool = [...this.pool, track];
+    this.trackListeners.forEach((l) => l(this.pool));
+    return true;
+  }
+
   onState(listener: Listener<ChannelState>): () => void {
     this.stateListeners.add(listener);
     if (this.state) listener(this.state);

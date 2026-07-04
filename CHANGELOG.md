@@ -11,6 +11,35 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.9.0] — 2026-07-04 — Connect Apple Music + feed the pool
+
+### Added
+- **Apple Music connect flow** (wired now, activates with a token): shared
+  music-provider singleton (`getMusicMachine`) driven by both playback and
+  the connect UI; `useMusicAuth` hook tracking `unconfigured/preview/
+  subscriber` and calling MusicKit `authorize()`. With
+  `EXPO_PUBLIC_APPLE_DEVELOPER_TOKEN` set, the Connect button runs the real
+  Apple sign-in; without it, a graceful "not configured yet" state.
+  → `src/hooks/useMusicAuth.ts`, `src/music/index.ts`
+- **Feed the channel** — `AddToPool` modal (＋ Add a banger in the nav /
+  below the hero on mobile): catalog search (`searchCatalog` — public
+  iTunes now, Apple provider when configured) that adds favorites to the
+  **shared candidate pool** the conductor plays for everyone. Stays on the
+  communal-channel concept; not a private playlist.
+  → `src/components/AddToPool.tsx`, `channelClient.addToPool`,
+  `stubChannel.addToPool`
+- Design-system `feed-the-channel.html` card; README "Feeding the channel"
+  section.
+
+### Changed
+- `usePlayback` now uses the shared provider singleton (no longer creates
+  or destroys its own), so auth state is shared with the connect flow.
+
+### Versioning
+- Manifests bumped to `0.9.0`.
+
+---
+
 ## [0.8.4] — 2026-07-04 — Remove the rotating gloss sheen
 
 ### Changed

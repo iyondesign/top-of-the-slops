@@ -17,6 +17,7 @@ import {
 
 import { attachPresence } from './src/channel/channelClient';
 import { AmbientBackdrop } from './src/components/AmbientBackdrop';
+import { AddToPool } from './src/components/AddToPool';
 import { Logo } from './src/components/Logo';
 import { OffAirCard } from './src/components/OffAirCard';
 import { OnAirBadge } from './src/components/OnAirBadge';
@@ -80,6 +81,7 @@ export default function App() {
               <Text style={styles.tuneInText}>▶ Tune in</Text>
             </PressableScale>
           )}
+          {isDesktop && <AddToPool />}
           {profile && <ProfileEditor profile={profile} onUpdate={update} />}
         </View>
       </View>
@@ -94,6 +96,7 @@ export default function App() {
       ) : (
         <ScrollView contentContainerStyle={styles.mobileBody}>
           {hero}
+          <AddToPool />
           <View style={styles.mobilePanel}>
             <RoomPanel profile={profile} config={config} state={state} />
           </View>

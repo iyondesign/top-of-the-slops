@@ -1,6 +1,6 @@
 {
   "name": "tots",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "main": "index.ts",
   "dependencies": {
     "@expo-google-fonts/space-grotesk": "^0.4.1",

@@ -76,9 +76,21 @@ Cloud Scheduler watchdog. Full instructions in its README.
 
 **3. Apple Music (MusicKit)** — join the Apple Developer Program, create a
 MusicKit key, and mint a developer token into
-`EXPO_PUBLIC_APPLE_DEVELOPER_TOKEN`. Web playback uses MusicKit JS; the
-native iOS module is the M0 milestone (placeholder at
+`EXPO_PUBLIC_APPLE_DEVELOPER_TOKEN`. With the token set, the **Connect
+Apple Music** button (in *Add a banger → Feed the channel*) runs the real
+MusicKit sign-in and subscribers hear full synced tracks; without it the
+app stays on 30s previews. Web playback uses MusicKit JS; the native iOS
+module is the M0 milestone (placeholder at
 `src/music/AppleMusicProvider.ts`).
+
+### Feeding the channel
+
+TOTS is **one shared channel**, not a personal player — so your favorites
+don't play privately; they join the **curated candidate pool** the
+conductor plays for everyone, and the crowd votes them 🔥/💩 (plan §8). Use
+**＋ Add a banger** to search the catalog (public iTunes search today; the
+Apple catalog once a token is set) and add tracks to the pool. In M2 this
+routes to `/channels/global/meta.poolTrackIds` behind admin guardrails.
 
 ## Repository layout
 

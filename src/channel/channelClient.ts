@@ -58,6 +58,15 @@ export function getTrackFromPool(trackId: string): Track | null {
   return transport.getTrack(trackId);
 }
 
+/**
+ * Contribute a favorite to the shared candidate pool. Local (stub) for
+ * now; M2 routes this to /channels/global/meta.poolTrackIds behind admin
+ * guardrails. Returns false if already in the pool.
+ */
+export function addToPool(track: Track): boolean {
+  return stubChannel.addToPool(track);
+}
+
 /** The one shared clock (RTDB /.info/serverTimeOffset in M2). */
 export function serverNow(): number {
   return transport.serverNow();

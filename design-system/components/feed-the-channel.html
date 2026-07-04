@@ -1,0 +1,39 @@
+<!-- @dsCard group="Components" name="Feed the channel — connect + add to pool" -->
+<style>
+:root{--bg:#0A0A0C;--raised:#131318;--sunken:#050507;--border:rgba(255,255,255,.07);--border-strong:rgba(255,255,255,.14);--text:#F7F7F8;--dim:#A0A0AA;--faint:#62626C;--accent:#FF4655;--accent-soft:rgba(255,70,85,.15);--mono:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:32px;display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;position:relative;overflow:hidden}
+body::before{content:'';position:fixed;width:420px;height:420px;border-radius:50%;background:#3D8BFF;filter:blur(90px);opacity:.28;top:-120px;left:-80px;z-index:-1}
+body::after{content:'';position:fixed;width:380px;height:380px;border-radius:50%;background:#FF4FD8;filter:blur(90px);opacity:.26;bottom:-120px;right:-60px;z-index:-1}
+.trigger{background:var(--raised);border:1px solid var(--border-strong);border-radius:999px;padding:8px 16px;font-size:12px;font-weight:600;color:var(--text);height:fit-content}
+.sheet{width:420px;background:rgba(19,19,24,.55);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.09);border-radius:24px;padding:24px;box-shadow:inset 0 1px 0 rgba(247,247,248,.05)}
+.hd{display:flex;justify-content:space-between;align-items:center}
+.hd b{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.hd .x{color:var(--dim)}
+.sub{color:var(--dim);font-size:12px;line-height:1.5;margin:6px 0 16px}
+.connect{background:var(--accent);color:#fff;border-radius:999px;text-align:center;padding:11px;font-weight:800;font-size:15px}
+.note{color:var(--faint);font-size:10px;line-height:1.4;margin-top:8px}
+.input{margin-top:16px;background:var(--sunken);border:1px solid var(--border);border-radius:12px;padding:11px 14px;font-size:14px;color:var(--faint)}
+.res{display:flex;align-items:center;gap:10px;padding:8px 0}
+.art{width:40px;height:40px;border-radius:8px}
+.rb{flex:1;min-width:0}
+.rt{font-size:12px;font-weight:700}
+.ra{font-size:10px;color:var(--faint)}
+.add{border:1px solid var(--accent);color:var(--accent);border-radius:999px;padding:6px 14px;font-size:10px;font-weight:800}
+.add.done{border-color:var(--border);color:var(--faint)}
+.cap{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:12px;max-width:420px;line-height:1.6}
+.cap b{color:var(--text)}
+</style>
+<div class="trigger">＋ Add a banger</div>
+<div>
+  <div class="sheet">
+    <div class="hd"><b>Feed the channel</b><span class="x">✕</span></div>
+    <div class="sub">Your favorites join the shared pool the channel plays for everyone — and the crowd votes them 🔥 or 💩.</div>
+    <div class="connect">🍎 Connect Apple Music</div>
+    <div class="note">Sign-in lights up once an Apple Developer token is set. Search still works now — tracks play as 30s previews until then.</div>
+    <div class="input">Search a song or artist…</div>
+    <div class="res"><div class="art" style="background:conic-gradient(from 200deg,#3D8BFF,#B265FF,#131318)"></div><div class="rb"><div class="rt">One More Time</div><div class="ra">Daft Punk</div></div><div class="add">＋ Add</div></div>
+    <div class="res"><div class="art" style="background:conic-gradient(from 90deg,#FF4FD8,#131318,#FF7A3D)"></div><div class="rb"><div class="rt">Digital Love</div><div class="ra">Daft Punk</div></div><div class="add done">✓ In pool</div></div>
+  </div>
+  <div class="cap"><b>On-concept:</b> favorites feed the shared candidate pool the conductor plays for the whole room — not a private playlist. Connect drives the same MusicKit provider as playback; graceful "not configured" state until a developer token lands. M2 routes adds to <b>/channels/global/meta.poolTrackIds</b> behind admin guardrails.</div>
+</div>

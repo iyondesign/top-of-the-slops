@@ -71,6 +71,21 @@ src/
   conductor's `pickNext` / early-skip seams; leaderboards replace the second
   rail.
 
+## MusicKit auth + the candidate pool
+
+One shared music provider (`getMusicMachine`) backs both the playback
+follower loop and the **Connect Apple Music** flow (`useMusicAuth` →
+`provider.authorize()`), so entitlement state is shared. Without a
+developer token the app runs the preview provider and the connect button
+shows a graceful "not configured" state; dropping in
+`EXPO_PUBLIC_APPLE_DEVELOPER_TOKEN` lights up real MusicKit sign-in.
+
+Favorites are **on-concept**: `AddToPool` searches the catalog
+(`searchCatalog`) and adds tracks to the shared candidate pool via
+`channelClient.addToPool` (stub today; M2 routes to
+`/channels/global/meta.poolTrackIds` behind admin guardrails), never a
+private playlist — the conductor still plays one channel for everyone.
+
 ## Data model (target, M2+)
 
 RTDB (fast-changing, conductor-written):
