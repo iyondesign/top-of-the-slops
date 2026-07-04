@@ -11,6 +11,17 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.6.1] — 2026-07-04 — Header uses the real brand mark
+
+### Changed
+- Header lockup now renders the actual icon artwork (`assets/logo-mark.png`,
+  rendered from `design-system/brand/mark.svg` — same art as the app icon)
+  via `Animated.Image` instead of a View-built approximation; still spins
+  lazily. Favicon verified served correctly (Expo converts the PNG to .ico
+  on the fly; browsers need a hard refresh to drop their favicon cache).
+
+---
+
 ## [0.6.0] — 2026-07-04 — Brand: logo, Space type family, per-track lighting
 
 ### Added
