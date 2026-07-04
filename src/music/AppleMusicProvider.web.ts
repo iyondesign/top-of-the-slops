@@ -48,16 +48,14 @@ export class AppleMusicProvider implements MusicProvider {
       Boolean(window.MusicKit && typeof (window.MusicKit as any).configure === 'function');
 
     if (!ready()) {
-      if (!document.querySelector(`script[src="${MUSICKIT_JS_URL}"]`)) {
-        const script = document.createElement('script');
-        script.src = MUSICKIT_JS_URL;
-        script.async = true;
-        script.onerror = () => {
-          // surfaced by the timeout below
-        };
-        document.head.appendChild(script);
-      }
+      // Remove any corpse from a previous failed attempt so a retry
+      // genuinely re-requests the script.
+      document
+        .querySelectorAll(`script[src="${MUSICKIT_JS_URL}"]`)
+        .forEach((el) => el.remove());
+
       await new Promise<void>((resolve, reject) => {
+        const script = document.createElement('script');
         const finish = () => {
           document.removeEventListener('musickitloaded', onLoaded);
           clearInterval(poll);
@@ -68,6 +66,18 @@ export class AppleMusicProvider implements MusicProvider {
           resolve();
         };
         document.addEventListener('musickitloaded', onLoaded, { once: true });
+        script.src = MUSICKIT_JS_URL;
+        script.async = true;
+        script.onerror = () => {
+          finish();
+          script.remove();
+          reject(
+            new Error(
+              `MusicKit JS failed to load from ${MUSICKIT_JS_URL} — check the browser Network tab (content blocker / firewall?)`,
+            ),
+          );
+        };
+        document.head.appendChild(script);
         const poll = setInterval(() => {
           if (ready()) {
             finish();
@@ -76,7 +86,12 @@ export class AppleMusicProvider implements MusicProvider {
         }, 100);
         const timer = setTimeout(() => {
           finish();
-          reject(new Error('MusicKit JS did not become ready (script blocked or offline?)'));
+          script.remove();
+          reject(
+            new Error(
+              'MusicKit JS loaded but never became ready within 15s — try a hard refresh; if it persists, check the Console for CSP or blocker messages',
+            ),
+          );
         }, 15_000);
       });
     }
