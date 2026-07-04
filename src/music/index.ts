@@ -72,6 +72,29 @@ export async function fetchPlaylistTracks(playlistId: string, limit = 100): Prom
   }
 }
 
+/** Save a song to the user's Apple Music library. */
+export async function addTrackToLibrary(trackId: string): Promise<boolean> {
+  const { provider } = getMusicMachine();
+  if (!provider.addToLibrary) return false;
+  try {
+    return await provider.addToLibrary(trackId);
+  } catch (err) {
+    console.warn('[tots] add to library failed', err);
+    return false;
+  }
+}
+
+/** Artist imagery for the ambient backdrop (null → fall back to album art). */
+export async function fetchArtistArtwork(trackId: string): Promise<string | null> {
+  const { provider } = getMusicMachine();
+  if (!provider.getArtistArtwork) return null;
+  try {
+    return await provider.getArtistArtwork(trackId);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * ONE shared music machine for the whole app — the playback loop and the
  * "Connect Apple Music" flow must drive the same provider instance so

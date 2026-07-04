@@ -113,12 +113,17 @@ export class StubChannel {
    */
   addToPool(track: Track): boolean {
     if (this.pool.some((t) => t.id === track.id)) return false;
-    // The stub rotates on the 30s preview boundary — clamp full catalog
-    // durations (e.g. library imports) so the demo room keeps moving.
-    this.pool = [
-      ...this.pool,
-      { ...track, durationMs: Math.min(track.durationMs || STUB_TRACK_DURATION_MS, STUB_TRACK_DURATION_MS) },
-    ];
+    // Requests jump the queue (live-radio rule): insert right after the
+    // current rotation position so the contribution shows up at the top
+    // of On Deck and plays soon — not appended 12 tracks out.
+    // Durations clamp to the 30s preview boundary in stub mode.
+    const clamped = {
+      ...track,
+      durationMs: Math.min(track.durationMs || STUB_TRACK_DURATION_MS, STUB_TRACK_DURATION_MS),
+    };
+    const next = [...this.pool];
+    next.splice(Math.min(this.poolIndex + 1, next.length), 0, clamped);
+    this.pool = next;
     this.addedAtMs.set(track.id, Date.now());
     this.trackListeners.forEach((l) => l(this.pool));
     return true;

@@ -11,6 +11,32 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.15.0] — 2026-07-04 — Hover controls, queue-jump requests, artist backdrops
+
+### Fixed
+- **Added songs now show in On Deck**: contributions were appended to the
+  END of the rotation (often beyond the 8 visible rows). Requests now
+  **jump the queue** — inserted right after the current track, live-radio
+  style — so they appear at the top of On Deck with their NEW badge and
+  play soon.
+
+### Added
+- **Record hover experience**: hovering the vinyl swells it slightly
+  (spring, 1.045×) and **glass controls fly out from behind the disc** —
+  local mute 🔊/🔇 (left) and **＋ save to your Apple Music library**
+  (right; ✓ on success, shown when a token is configured). Tap toggles on
+  touch devices. Nav mute button retired in favor of this.
+- **Artist imagery backdrops**: the ambient backdrop now features the
+  current track's ARTIST photo from the Apple catalog (developer token
+  only, cached per track; falls back to album art). → `useArtistArtwork`,
+  `getArtistArtwork`
+- Provider: `addToLibrary` (POST /v1/me/library).
+
+### Versioning
+- Manifests bumped to `0.15.0`.
+
+---
+
 ## [0.14.0] — 2026-07-04 — Live-radio controls: mute + On Deck room queue
 
 ### Added

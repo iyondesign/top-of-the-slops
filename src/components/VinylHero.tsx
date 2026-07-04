@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { subscribeBooedOff } from '../channel/channelClient';
+import { addTrackToLibrary, isAppleConfigured } from '../music';
 import { colors, fonts, motion, radius, space, type } from '../theme';
 import type { ChannelState, Track, UserProfile } from '../types';
+import { GlassPanel } from '../ui/GlassPanel';
+import { PressableScale } from '../ui/PressableScale';
 import { VotePlaybackBar } from './VotePlaybackBar';
 
 interface Props {
@@ -13,22 +16,49 @@ interface Props {
   profile: UserProfile | null;
   /** Dominant artwork color — re-lights the glow + spindle per track. */
   tint: string;
+  muted: boolean;
+  onToggleMute: () => void;
 }
 
 /**
  * The Now Playing hero: spinning record under a soft signal glow, one
- * line of title · artist, and the smart VotePlaybackBar (playback +
- * vote tug fused). Track changes enter with the needle-drop. Long-press
- * the ON AIR pill to flip the dev off-air failsafe.
+ * line of title · artist, and the smart VotePlaybackBar. Hovering the
+ * record grows it slightly and glass controls fly out from behind the
+ * disc — local mute (the broadcast never pauses) and save-to-library.
+ * Track changes enter with the needle-drop.
  */
-export function VinylHero({ state, track, size, profile, tint }: Props) {
+export function VinylHero({ state, track, size, profile, tint, muted, onToggleMute }: Props) {
   // Accumulating rotation (degrees) so we can spin up / coast like a real
   // platter rather than snapping between stopped and full speed.
   const rotation = useRef(new Animated.Value(0)).current;
   const accumDeg = useRef(0);
   const loopToken = useRef(0);
   const drop = useRef(new Animated.Value(1)).current;
+  const hover = useRef(new Animated.Value(0)).current;
+  const [hovered, setHovered] = useState(false);
+  const [saved, setSaved] = useState<'idle' | 'saving' | 'saved' | 'failed'>('idle');
   const [booed, setBooed] = useState<Track | null>(null);
+
+  // Hover physics: the record swells slightly and the controls fly out.
+  useEffect(() => {
+    Animated.spring(hover, {
+      toValue: hovered ? 1 : 0,
+      speed: 18,
+      bounciness: 6,
+      useNativeDriver: true,
+    }).start();
+  }, [hovered]);
+
+  // New track -> fresh save state.
+  useEffect(() => setSaved('idle'), [state.currentTrackId]);
+
+  const saveToLibrary = async () => {
+    if (!track || saved === 'saving' || saved === 'saved') return;
+    setSaved('saving');
+    const ok = await addTrackToLibrary(track.id);
+    setSaved(ok ? 'saved' : 'failed');
+    if (!ok) setTimeout(() => setSaved('idle'), 2_500);
+  };
 
   useEffect(
     () =>
@@ -107,15 +137,27 @@ export function VinylHero({ state, track, size, profile, tint }: Props) {
   const artSize = size * 0.62;
   const initial = (track?.artist ?? track?.title ?? '♪').trim().charAt(0).toUpperCase() || '♪';
 
+  const hoverScale = hover.interpolate({ inputRange: [0, 1], outputRange: [1, 1.045] });
+  const controlOpacity = hover.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 0, 1] });
+  const controlY = hover.interpolate({ inputRange: [0, 1], outputRange: [0, size * 0.44] });
+  const controlXL = hover.interpolate({ inputRange: [0, 1], outputRange: [0, -size * 0.3] });
+  const controlXR = hover.interpolate({ inputRange: [0, 1], outputRange: [0, size * 0.3] });
+  const controlScale = hover.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] });
+
   return (
     <View style={styles.container}>
+      <Pressable
+        onHoverIn={() => setHovered(true)}
+        onHoverOut={() => setHovered(false)}
+        onPress={() => setHovered((h) => !h)}
+      >
       <Animated.View
         style={{
           width: size,
           height: size,
           alignItems: 'center',
           justifyContent: 'center',
-          transform: [{ scale: drop }],
+          transform: [{ scale: Animated.multiply(drop, hoverScale) }],
           opacity: drop.interpolate({ inputRange: [0.94, 1], outputRange: [0.6, 1] }),
         }}
       >
@@ -131,6 +173,45 @@ export function VinylHero({ state, track, size, profile, tint }: Props) {
             },
           ]}
         />
+
+        {/* Glass controls — start hidden behind the disc, fly out below
+            it on hover: local mute + save to Apple Music library. */}
+        <Animated.View
+          pointerEvents={hovered ? 'auto' : 'none'}
+          style={[
+            styles.controlWrap,
+            {
+              opacity: controlOpacity,
+              transform: [{ translateX: controlXL }, { translateY: controlY }, { scale: controlScale }],
+            },
+          ]}
+        >
+          <PressableScale onPress={onToggleMute}>
+            <GlassPanel style={styles.controlButton}>
+              <Text style={styles.controlIcon}>{muted ? '🔇' : '🔊'}</Text>
+            </GlassPanel>
+          </PressableScale>
+        </Animated.View>
+        {isAppleConfigured() && (
+          <Animated.View
+            pointerEvents={hovered ? 'auto' : 'none'}
+            style={[
+              styles.controlWrap,
+              {
+                opacity: controlOpacity,
+                transform: [{ translateX: controlXR }, { translateY: controlY }, { scale: controlScale }],
+              },
+            ]}
+          >
+            <PressableScale onPress={saveToLibrary}>
+              <GlassPanel style={styles.controlButton}>
+                <Text style={styles.controlIcon}>
+                  {saved === 'saved' ? '✓' : saved === 'saving' ? '…' : saved === 'failed' ? '!' : '＋'}
+                </Text>
+              </GlassPanel>
+            </PressableScale>
+          </Animated.View>
+        )}
         <Animated.View
           style={[styles.record, { width: size, height: size, transform: [{ rotate }] }]}
         >
@@ -176,6 +257,7 @@ export function VinylHero({ state, track, size, profile, tint }: Props) {
           <View style={[styles.spindle, { borderColor: tint }]} />
         </Animated.View>
       </Animated.View>
+      </Pressable>
 
       <Text style={styles.trackLine} numberOfLines={1}>
         {track?.title ?? 'Dropping the needle…'}
@@ -212,6 +294,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.vinylGroove,
   },
+  controlWrap: { position: 'absolute', zIndex: 3 },
+  controlButton: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  controlIcon: { fontSize: 18, color: colors.text },
   groove: {
     position: 'absolute',
     borderWidth: 1,

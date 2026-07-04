@@ -307,6 +307,44 @@ export class AppleMusicProvider implements MusicProvider {
     return mapSongs(res?.data?.data);
   }
 
+  /** Save a catalog song to the user's library (needs authorize()). */
+  async addToLibrary(trackId: string): Promise<boolean> {
+    const music = await this.music();
+    if (!music.isAuthorized) await music.authorize();
+    await music.api.music(
+      '/v1/me/library',
+      { 'ids[songs]': trackId },
+      { fetchOptions: { method: 'POST' } },
+    );
+    return true;
+  }
+
+  private artistArtCache = new Map<string, string | null>();
+
+  /**
+   * The track's primary artist imagery (Apple ships real artist photos
+   * on catalog artist resources) — developer token only, no user auth
+   * needed. Cached per track.
+   */
+  async getArtistArtwork(trackId: string): Promise<string | null> {
+    if (this.artistArtCache.has(trackId)) return this.artistArtCache.get(trackId)!;
+    try {
+      const music = await this.music();
+      const res = await music.api.music(
+        `/v1/catalog/{{storefrontId}}/songs/${trackId}`,
+        { include: 'artists' },
+      );
+      const artists = res?.data?.data?.[0]?.relationships?.artists?.data ?? [];
+      const artwork = artists[0]?.attributes?.artwork;
+      const url = artwork ? window.MusicKit!.formatArtworkURL(artwork, 1200, 1200) : null;
+      this.artistArtCache.set(trackId, url);
+      return url;
+    } catch {
+      this.artistArtCache.set(trackId, null);
+      return null;
+    }
+  }
+
   async play(trackId: string, positionMs: number): Promise<void> {
     const music = await this.music();
     await music.setQueue({ song: trackId });

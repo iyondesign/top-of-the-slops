@@ -35,6 +35,12 @@ export interface MusicProvider {
   /** Tracks inside one library playlist. */
   getPlaylistTracks?(playlistId: string, limit?: number): Promise<Track[]>;
 
+  /** Save a catalog song into the signed-in user's library. */
+  addToLibrary?(trackId: string): Promise<boolean>;
+
+  /** The track's primary ARTIST imagery (not album art) for the backdrop. */
+  getArtistArtwork?(trackId: string): Promise<string | null>;
+
   /** Load and play a track from a position (ms). */
   play(trackId: string, positionMs: number): Promise<void>;
   pause(): Promise<void>;

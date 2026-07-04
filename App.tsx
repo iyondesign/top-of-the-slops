@@ -24,6 +24,7 @@ import { OnAirBadge } from './src/components/OnAirBadge';
 import { ProfileEditor } from './src/components/ProfileEditor';
 import { RoomPanel } from './src/components/RoomPanel';
 import { VinylHero } from './src/components/VinylHero';
+import { useArtistArtwork } from './src/hooks/useArtistArtwork';
 import { useArtworkTint } from './src/hooks/useArtworkTint';
 import { useAppConfig, useChannelState, useCurrentTrack } from './src/hooks/useChannel';
 import { useIdentity } from './src/hooks/useIdentity';
@@ -46,6 +47,7 @@ export default function App() {
   const { profile, update, link } = useIdentity();
   const { enabled, enable, muted, toggleMute } = usePlayback(state, config);
   const tint = useArtworkTint(track?.artworkUrl);
+  const backdropUrl = useArtistArtwork(track);
 
   useEffect(() => {
     if (profile && !profile.uid.startsWith('local-')) attachPresence(profile.uid);
@@ -56,7 +58,15 @@ export default function App() {
   const hero = !config.isLive ? (
     <OffAirCard size={heroSize} />
   ) : state ? (
-    <VinylHero state={state} track={track} size={heroSize} profile={profile} tint={tint} />
+    <VinylHero
+      state={state}
+      track={track}
+      size={heroSize}
+      profile={profile}
+      tint={tint}
+      muted={muted}
+      onToggleMute={toggleMute}
+    />
   ) : (
     <Text style={styles.loading}>Warming up the decks…</Text>
   );
@@ -67,7 +77,7 @@ export default function App() {
 
   return (
     <View style={styles.canvas}>
-      <AmbientBackdrop artworkUrl={track?.artworkUrl || null} />
+      <AmbientBackdrop artworkUrl={backdropUrl} />
       <SafeAreaView style={styles.root}>
         <StatusBar style="light" />
       <View style={styles.topBar}>
@@ -79,14 +89,6 @@ export default function App() {
           {!enabled && config.isLive && state && (
             <PressableScale style={styles.tuneIn} onPress={enable}>
               <Text style={styles.tuneInText}>▶ Tune in</Text>
-            </PressableScale>
-          )}
-          {enabled && (
-            <PressableScale
-              style={StyleSheet.flatten([styles.muteButton, muted && styles.muteButtonMuted])}
-              onPress={toggleMute}
-            >
-              <Text style={styles.muteIcon}>{muted ? '🔇' : '🔊'}</Text>
             </PressableScale>
           )}
           {isDesktop && <AddToPool />}
@@ -138,18 +140,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
   },
   tuneInText: { color: '#FFFFFF', fontFamily: fonts.display, fontSize: type.caption },
-  muteButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: colors.glassFill,
-    borderWidth: 1,
-    borderColor: colors.glassBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  muteButtonMuted: { borderColor: colors.accent, backgroundColor: colors.accentSoft },
-  muteIcon: { fontSize: 15 },
   desktopBody: {
     flex: 1,
     flexDirection: 'row',
