@@ -70,6 +70,11 @@ env config).
 ### Removed
 - `SideRail` placeholder — superseded by the real `ChatPanel` / `LeaderboardPanel`.
 
+### Versioning
+- Aligned all manifests to `0.2.0` (`package.json` had carried the scaffold
+  default `1.0.0`; `app.json` and `server/conductor/package.json` moved up from
+  `0.1.0`). Version numbers now track this changelog.
+
 ---
 
 ## [0.1.0] — 2026-07-04 — M1 Anonymous Shell (on stub channel)
