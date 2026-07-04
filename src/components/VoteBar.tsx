@@ -1,20 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 
 import { castVote, getUserVote } from '../channel/channelClient';
-import { colors, radius, space, type } from '../theme';
+import { colors, gradients, radius, samplePalette, space, type } from '../theme';
 import type { ChannelState, UserProfile, VoteValue } from '../types';
+import { PressableScale } from '../ui/PressableScale';
 
 interface Props {
   state: ChannelState;
   profile: UserProfile | null;
 }
 
+const TUG_SLICES = 16;
+
 /**
- * The emotional core of the loop (plan §2): 🔥 banger vs 💩 slop, one
- * vote per track-play, with a live tug-of-war tally. Votes persist +
- * earn tastemaker cred after Sign in with Apple (M4's auth half); for
- * anonymous users they still move the room.
+ * The emotional core of the loop: 🔥 banger vs 💩 slop, one vote per
+ * track-play. The tally is a gradient tug-of-war — fire's end burns
+ * orange→red, slop's end runs violet→magenta (sliced samples of the two
+ * gradients). Press = votePop spring on top of the shared press physics.
  */
 export function VoteBar({ state, profile }: Props) {
   const [voted, setVoted] = useState<VoteValue | null>(null);
@@ -46,7 +49,7 @@ export function VoteBar({ state, profile }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.row}>
-        <Pressable onPress={() => vote('fire')} disabled={!!voted}>
+        <PressableScale onPress={() => vote('fire')} disabled={!!voted}>
           <Animated.View
             style={[
               styles.button,
@@ -59,18 +62,34 @@ export function VoteBar({ state, profile }: Props) {
             <Text style={styles.buttonEmoji}>🔥</Text>
             <Text style={[styles.count, { color: colors.fire }]}>{state.liveFireCount}</Text>
           </Animated.View>
-        </Pressable>
+        </PressableScale>
 
-        <View style={styles.tallyTrack}>
-          <View
-            style={[styles.tallyFire, { flex: Math.max(fireShare, 0.02) }]}
-          />
-          <View
-            style={[styles.tallySlop, { flex: Math.max(1 - fireShare, 0.02) }]}
-          />
+        <View style={styles.tugTrack}>
+          {Array.from({ length: TUG_SLICES }, (_, i) => {
+            const t = (i + 0.5) / TUG_SLICES;
+            const onFireSide = t <= fireShare;
+            const local = onFireSide
+              ? fireShare === 0
+                ? 0
+                : t / fireShare
+              : (t - fireShare) / Math.max(1 - fireShare, 0.0001);
+            return (
+              <View
+                key={i}
+                style={[
+                  styles.tugSlice,
+                  {
+                    backgroundColor: onFireSide
+                      ? samplePalette(gradients.fire, local)
+                      : samplePalette(gradients.slop, local),
+                  },
+                ]}
+              />
+            );
+          })}
         </View>
 
-        <Pressable onPress={() => vote('slop')} disabled={!!voted}>
+        <PressableScale onPress={() => vote('slop')} disabled={!!voted}>
           <Animated.View
             style={[
               styles.button,
@@ -83,7 +102,7 @@ export function VoteBar({ state, profile }: Props) {
             <Text style={styles.buttonEmoji}>💩</Text>
             <Text style={[styles.count, { color: colors.slop }]}>{state.liveSlopCount}</Text>
           </Animated.View>
-        </Pressable>
+        </PressableScale>
       </View>
       <Text style={styles.hint}>
         {voted
@@ -108,22 +127,21 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
     borderWidth: 1,
   },
-  fireButton: { borderColor: colors.fire, backgroundColor: 'rgba(249, 115, 22, 0.10)' },
-  slopButton: { borderColor: colors.slop, backgroundColor: 'rgba(139, 92, 246, 0.10)' },
-  fireVoted: { backgroundColor: 'rgba(249, 115, 22, 0.30)' },
-  slopVoted: { backgroundColor: 'rgba(139, 92, 246, 0.30)' },
+  fireButton: { borderColor: colors.fire, backgroundColor: 'rgba(255, 122, 61, 0.10)' },
+  slopButton: { borderColor: colors.slop, backgroundColor: 'rgba(178, 101, 255, 0.10)' },
+  fireVoted: { backgroundColor: 'rgba(255, 122, 61, 0.30)' },
+  slopVoted: { backgroundColor: 'rgba(178, 101, 255, 0.30)' },
   dimmed: { opacity: 0.35 },
   buttonEmoji: { fontSize: 20 },
   count: { fontSize: type.body, fontWeight: '800', minWidth: 20, textAlign: 'center' },
-  tallyTrack: {
+  tugTrack: {
     flexDirection: 'row',
-    width: 120,
+    width: 132,
     height: 8,
     borderRadius: 4,
     overflow: 'hidden',
-    backgroundColor: colors.bgRaised,
+    gap: 1,
   },
-  tallyFire: { backgroundColor: colors.fire },
-  tallySlop: { backgroundColor: colors.slop },
+  tugSlice: { flex: 1 },
   hint: { color: colors.textFaint, fontSize: type.micro },
 });

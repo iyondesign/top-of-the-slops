@@ -4,7 +4,9 @@ import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from 'reac
 import { devSetAppConfig, serverNow, subscribeBooedOff } from '../channel/channelClient';
 import { colors, fonts, motion, radius, space, type } from '../theme';
 import type { ChannelState, Track, UserProfile } from '../types';
+import { PressableScale } from '../ui/PressableScale';
 import { VoteBar } from './VoteBar';
+import { Waveform } from './Waveform';
 
 interface Props {
   state: ChannelState;
@@ -16,12 +18,15 @@ interface Props {
 }
 
 /**
- * The MD-Vinyl Now Playing hero (plan §15): oversized album art on a
- * spinning record, title/artist, LIVE badge, listener count, progress.
- * Long-press the LIVE pill to flip the dev off-air failsafe.
+ * The Now Playing hero: spinning record under a soft signal glow, live
+ * waveform as the progress element, telemetry rail, votes. Track changes
+ * enter with the needle-drop (scale 0.94→1 spring + fade). Long-press
+ * the ON AIR pill to flip the dev off-air failsafe.
  */
 export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, profile }: Props) {
   const spin = useRef(new Animated.Value(0)).current;
+  const lamp = useRef(new Animated.Value(1)).current;
+  const drop = useRef(new Animated.Value(1)).current;
   const [booed, setBooed] = useState<Track | null>(null);
 
   useEffect(
@@ -32,8 +37,6 @@ export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, prof
       }),
     [],
   );
-
-  const lamp = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const loop = Animated.loop(
@@ -59,6 +62,12 @@ export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, prof
     return () => pulse.stop();
   }, []);
 
+  // Needle drop: each new track lands with a spring.
+  useEffect(() => {
+    drop.setValue(0.94);
+    Animated.spring(drop, { toValue: 1, speed: 14, bounciness: 8, useNativeDriver: true }).start();
+  }, [state.currentTrackId, state.startedAtServerMs]);
+
   const rotate = spin.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
   const artSize = size * 0.62;
 
@@ -77,11 +86,20 @@ export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, prof
         </View>
       </View>
 
-      <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <Animated.View
+        style={{
+          width: size,
+          height: size,
+          alignItems: 'center',
+          justifyContent: 'center',
+          transform: [{ scale: drop }],
+          opacity: drop.interpolate({ inputRange: [0.94, 1], outputRange: [0.6, 1] }),
+        }}
+      >
         <View
           style={[
             styles.glow,
-            { width: size * 0.8, height: size * 0.8, borderRadius: (size * 0.8) / 2 },
+            { width: size * 0.82, height: size * 0.82, borderRadius: (size * 0.82) / 2 },
           ]}
         />
         <Animated.View
@@ -114,7 +132,7 @@ export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, prof
           </View>
           <View style={styles.spindle} />
         </Animated.View>
-      </View>
+      </Animated.View>
 
       <Text style={styles.title} numberOfLines={2}>
         {track?.title ?? 'Dropping the needle…'}
@@ -123,7 +141,7 @@ export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, prof
         {track?.artist ?? ''}
       </Text>
 
-      <ProgressBar state={state} width={size} />
+      <LiveProgress state={state} width={size} />
 
       <VoteBar state={state} profile={profile} />
 
@@ -136,15 +154,15 @@ export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, prof
       )}
 
       {!listeningEnabled && (
-        <Pressable style={styles.tuneIn} onPress={onTuneIn}>
+        <PressableScale style={styles.tuneIn} onPress={onTuneIn}>
           <Text style={styles.tuneInText}>▶ Tap to tune in</Text>
-        </Pressable>
+        </PressableScale>
       )}
     </View>
   );
 }
 
-function ProgressBar({ state, width }: { state: ChannelState; width: number }) {
+function LiveProgress({ state, width }: { state: ChannelState; width: number }) {
   const [elapsedMs, setElapsedMs] = useState(0);
 
   useEffect(() => {
@@ -159,9 +177,7 @@ function ProgressBar({ state, width }: { state: ChannelState; width: number }) {
   const progress = Math.min(1, elapsedMs / state.durationMs);
   return (
     <View style={{ width }}>
-      <View style={styles.progressTrack}>
-        <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
-      </View>
+      <Waveform width={width} progress={progress} isPlaying={state.isPlaying} />
       <View style={styles.timecodeRow}>
         <Text style={styles.timecode}>
           {formatMs(Math.min(elapsedMs, state.durationMs))} / {formatMs(state.durationMs)}
@@ -186,7 +202,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    backgroundColor: colors.accentSoft,
     borderColor: colors.live,
     borderWidth: 1,
     paddingHorizontal: space.md,
@@ -210,7 +226,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.full,
   },
   listenerText: {
-    color: colors.phosphor,
+    color: colors.telemetry,
     fontSize: 11,
     fontFamily: fonts.mono,
     letterSpacing: 1,
@@ -218,10 +234,10 @@ const styles = StyleSheet.create({
   glow: {
     position: 'absolute',
     backgroundColor: colors.accent,
-    opacity: 0.16,
+    opacity: 0.1,
     shadowColor: colors.accent,
-    shadowOpacity: 0.6,
-    shadowRadius: 60,
+    shadowOpacity: 0.5,
+    shadowRadius: 70,
     shadowOffset: { width: 0, height: 0 },
   },
   record: {
@@ -230,7 +246,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.vinylGroove,
   },
   groove: {
     position: 'absolute',
@@ -255,27 +271,19 @@ const styles = StyleSheet.create({
   title: {
     color: colors.text,
     fontSize: type.hero,
-    fontWeight: '900',
+    fontWeight: '800',
     textAlign: 'center',
     maxWidth: 480,
-    textTransform: 'uppercase',
-    letterSpacing: -0.3,
+    letterSpacing: -0.6,
   },
-  artist: { color: colors.textDim, fontSize: type.title, fontWeight: '800', textAlign: 'center' },
-  progressTrack: {
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.bgRaised,
-    overflow: 'hidden',
-  },
-  progressFill: { height: 4, backgroundColor: colors.accent },
+  artist: { color: colors.textDim, fontSize: type.title - 2, fontWeight: '600', textAlign: 'center' },
   timecodeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 6,
+    marginTop: 8,
   },
   timecode: {
-    color: colors.phosphor,
+    color: colors.telemetry,
     fontSize: type.micro,
     fontFamily: fonts.mono,
     letterSpacing: 1,
@@ -287,7 +295,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   booedBanner: {
-    backgroundColor: 'rgba(139, 92, 246, 0.18)',
+    backgroundColor: 'rgba(178, 101, 255, 0.16)',
     borderColor: colors.slop,
     borderWidth: 1,
     borderRadius: radius.full,
@@ -298,8 +306,12 @@ const styles = StyleSheet.create({
   tuneIn: {
     backgroundColor: colors.accent,
     paddingHorizontal: space.lg,
-    paddingVertical: space.sm + 2,
+    paddingVertical: space.sm + 4,
     borderRadius: radius.full,
+    shadowColor: colors.accent,
+    shadowOpacity: 0.45,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 0 },
   },
-  tuneInText: { color: colors.bgSunken, fontWeight: '800', fontSize: type.body },
+  tuneInText: { color: '#FFFFFF', fontWeight: '800', fontSize: type.body },
 });

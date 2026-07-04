@@ -1,43 +1,57 @@
 import { Platform } from 'react-native';
 
 /**
- * "Broadcast Vinyl" — the TOTS design language, applied.
- * Single source of styling truth; the visual spec and rationale live in
- * docs/DESIGN.md and the rendered cards in design-system/.
+ * "Signal" — the TOTS design language, v2.
+ * Premium-modern pass after the Beat / Muzaic reference set: neutral rich
+ * black (never warm, never pure #000), ONE coral signal color for action
+ * and on-air, and a spectrum gradient reserved exclusively for live music
+ * energy (waveform, vote tug, mood). Spec + rationale: docs/DESIGN.md;
+ * rendered cards: design-system/.
  *
- * One voice per color: gold acts, red is on-air, orange burns (🔥),
- * violet boos (💩), phosphor reports (live telemetry). Never borrow a
+ * One voice per color: coral acts + broadcasts, orange burns (🔥), violet
+ * boos (💩), the spectrum sings, neutral mono reports. Never borrow a
  * color for a second job.
  */
 
 export const colors = {
-  // Warm near-black studio backdrop — never pure #000
-  bg: '#0D0B09',
-  bgRaised: '#17130F',
-  bgSunken: '#070605',
-  border: '#2B241D',
+  // Neutral rich black — cool, not warm; never pure #000
+  bg: '#0A0A0C',
+  bgRaised: '#131318',
+  bgSunken: '#050507',
+  border: 'rgba(255, 255, 255, 0.07)',
+  borderStrong: 'rgba(255, 255, 255, 0.14)',
 
-  text: '#F6EFE3',
-  textDim: '#AFA28D',
-  textFaint: '#6E6355',
+  text: '#F7F7F8',
+  textDim: '#A0A0AA',
+  textFaint: '#62626C',
 
-  // Gold — brand, primary action, focus
-  accent: '#F5A623',
-  accentSoft: 'rgba(245, 166, 35, 0.14)',
+  // Coral — the single signal color: primary action AND on-air
+  accent: '#FF4655',
+  accentSoft: 'rgba(255, 70, 85, 0.15)',
+  live: '#FF4655',
 
-  // ON AIR lamp + off-air messaging only
-  live: '#FF3B30',
+  // The vote duality (ends of the spectrum)
+  fire: '#FF7A3D',
+  slop: '#B265FF',
 
-  // The vote duality
-  fire: '#FF6B2C',
-  slop: '#9D6BFF',
+  // Live telemetry readouts — quiet neutral mono, never colored
+  telemetry: '#9A9AA3',
 
-  // Live telemetry: timecode, counts, sync readouts
-  phosphor: '#35E08A',
+  vinyl: '#0E0E12',
+  vinylGroove: '#202028',
+  vinylLabel: '#FF4655',
+} as const;
 
-  vinyl: '#0A0908',
-  vinylGroove: '#221C16',
-  vinylLabel: '#F5A623',
+/**
+ * The spectrum — Muzaic-style gradient light on black. Reserved for live
+ * music energy only (waveform, tug bar, generative art). Sample it with
+ * samplePalette(); never use a spectrum stop as a UI chrome color.
+ */
+export const spectrum = ['#3D8BFF', '#B265FF', '#FF4FD8', '#FF7A3D'] as const;
+
+export const gradients = {
+  fire: ['#FFB13D', '#FF5E3A'] as const,
+  slop: ['#8B5CF6', '#FF4FD8'] as const,
 } as const;
 
 export const fonts = {
@@ -65,7 +79,7 @@ export const radius = {
 } as const;
 
 export const type = {
-  hero: 30,
+  hero: 32,
   title: 20,
   body: 15,
   caption: 12,
@@ -76,13 +90,37 @@ export const type = {
 export const motion = {
   /** Vinyl spin ≈ 33⅓ rpm. */
   rpm33: 1800,
-  /** Track-change entrance. */
+  /** Track-change entrance (scale 0.94→1 spring + fade). */
   needleDrop: 400,
   /** 🔥/💩 press spring. */
   votePop: 300,
   /** ON AIR lamp breathing. */
   onAirPulse: 2000,
+  /** Press-down scale for every touchable (PressableScale). */
+  pressScale: 0.95,
 } as const;
 
 /** Desktop gets hero + side rails; below this it's hero-first stacked. */
 export const DESKTOP_BREAKPOINT = 1024;
+
+// ---------------------------------------------------------------------------
+// Color math for the spectrum (no gradient dependency needed: bars/slices
+// sample the palette per-element, which collectively reads as a gradient).
+
+function hexChannel(hex: string, i: number): number {
+  return parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+}
+
+export function lerpColor(a: string, b: string, t: number): string {
+  const ch = (i: number) =>
+    Math.round(hexChannel(a, i) + (hexChannel(b, i) - hexChannel(a, i)) * t);
+  return `rgb(${ch(0)}, ${ch(1)}, ${ch(2)})`;
+}
+
+/** Sample a multi-stop palette at t ∈ [0,1]. */
+export function samplePalette(stops: readonly string[], t: number): string {
+  const clamped = Math.min(1, Math.max(0, t));
+  const seg = clamped * (stops.length - 1);
+  const i = Math.min(stops.length - 2, Math.floor(seg));
+  return lerpColor(stops[i], stops[i + 1], seg - i);
+}

@@ -1,4 +1,4 @@
-# Broadcast Vinyl — the TOTS design language
+# Signal — the TOTS design language (v2)
 
 The design system lives in [`design-system/`](../design-system/) as rendered
 preview cards (DesignSync format) and is applied in code via
@@ -6,38 +6,37 @@ preview cards (DesignSync format) and is applied in code via
 
 ## Lineage
 
-Two bloodlines, deliberately fused:
+v1 ("Broadcast Vinyl") fused the dark music-app genre with TOTS's MD-Vinyl +
+broadcast DNA. v2 is the **premium-modern pass** against a concrete reference
+set supplied by the product owner (Beat; Muzaic):
 
-1. **The contemporary dark music-app school** (the Dribbble reference set —
-   QENARA / Orizon-style luxury dark UI, bento music dashboards): near-black
-   canvas, ONE electric accent doing all the talking, oversized ultra-heavy
-   display type, pill-shaped controls, big-radius cards, chromatic glow bleeding
-   out from artwork, generous negative space.
-2. **TOTS's own DNA** (product plan §2/§15, non-negotiable): MD-Vinyl warmth —
-   oversized album art, spinning record, tactile and nostalgic — wrapped in a
-   live *broadcast channel* overlay. MTV/TRL, not a streaming library.
-
-What makes it unique — the part no reference shot has: **the app is a TV
-station.** Chrome speaks broadcast: an ON AIR tally lamp, phosphor-green
-timecode and telemetry in monospace, a channel bug (TOTS•01), and the 🔥/💩
-vote duality as a two-tone tug-of-war. Dark-luxury restraint from the genre;
-warmth and crowd-noise from TOTS.
+- **From Beat:** neutral rich black (cool, not warm), ONE coral-red signal
+  color doing all the talking, SF-grade grotesque with sentence-case bold
+  headers, circular controls, red pill CTAs. Restraint as luxury.
+- **From Muzaic:** the canvas stays colorless so a single
+  **spectrum gradient** (blue→violet→pink→orange) can carry all the emotion —
+  waveform lines, mood blobs, generative art. Huge light-weight prompt type.
+  Emptiness as confidence.
+- **Kept from TOTS v1 (the part no reference has):** the app is a TV
+  station — ON AIR tally lamp, mono telemetry, TOTS•01 channel bug, the 🔥/💩
+  duality, and the spinning vinyl itself.
 
 ## Principles
 
 1. **Artwork is the sun.** The vinyl hero is the largest thing on any screen;
-   its glow is the room's lighting. Everything else is matte and recedes.
-2. **One voice per color.** Gold = brand/action. Red = ON AIR. Orange = 🔥.
-   Violet = 💩. Phosphor green = live telemetry (counts, clocks, sync). Never
-   borrow a color for a second job.
-3. **Broadcast, not dashboard.** Labels read like a control room: `ON AIR`,
-   `26 IN THE ROOM`, `00:14 / 00:30`, `TOTS•01`. Micro-type is uppercase,
-   letterspaced, mono where it's live data.
-4. **Tactile or nothing.** Anything interactive moves like an object: votes
-   pop, the record spins at 33⅓, track changes drop the needle. No fades where
-   a spring belongs.
-5. **The crowd is visible.** Presence, tallies, and flair are ambient light,
-   not widgets — a quiet room should still look inhabited.
+   a soft signal glow is the room's lighting. Everything else is matte.
+2. **One voice per color.** Coral = action + on-air (the single signal).
+   Orange = 🔥. Violet = 💩. Neutral mono = telemetry. **The spectrum sings** —
+   and only sings: it appears exclusively where live music energy is
+   (waveform, vote tug, generative art), never as chrome.
+3. **Broadcast, not dashboard.** `ON AIR`, `26 IN THE ROOM`, `00:14 / 00:30`,
+   `TOTS•01` — control-room voice in quiet neutral mono, humming under big
+   human type.
+4. **Tactile or nothing.** Every touchable presses down (spring to 0.95).
+   Votes pop. Tracks needle-drop in. The record spins at 33⅓. Nothing
+   interactive is allowed to feel inert.
+5. **The crowd is visible.** Presence, tallies, message entrances — ambient
+   life, not widgets.
 
 ## Tokens
 
@@ -45,67 +44,78 @@ warmth and crowd-noise from TOTS.
 
 | Token | Value | Job |
 | --- | --- | --- |
-| `bg` | `#0D0B09` | canvas — warm black, never pure #000 |
-| `bgRaised` | `#17130F` | cards, rails |
-| `bgSunken` | `#070605` | wells, inputs, vinyl label |
-| `border` | `#2B241D` | 1px hairlines |
-| `text` | `#F6EFE3` | primary ink (cream, not white) |
-| `textDim` | `#AFA28D` | secondary |
-| `textFaint` | `#6E6355` | tertiary/labels |
-| `gold` | `#F5A623` | brand, primary action, focus ring |
-| `goldSoft` | `rgba(245,166,35,.14)` | selected/soft fills |
-| `onAir` | `#FF3B30` | LIVE lamp + off-air messaging only |
-| `fire` | `#FF6B2C` | 🔥 banger side |
-| `slop` | `#9D6BFF` | 💩 slop side |
-| `phosphor` | `#35E08A` | live telemetry: timecode, listener count, sync |
-| `vinyl` | `#0A0908` / groove `#221C16` | the record |
+| `bg` | `#0A0A0C` | canvas — neutral rich black, never `#000` |
+| `bgRaised` | `#131318` | cards, rails |
+| `bgSunken` | `#050507` | wells, inputs, vinyl label |
+| `border` | `rgba(255,255,255,.07)` | hairlines (`borderStrong` `.14` for focus) |
+| `text` | `#F7F7F8` | primary ink |
+| `textDim` / `textFaint` | `#A0A0AA` / `#62626C` | secondary / tertiary |
+| `accent` = `live` | `#FF4655` | **the** signal: primary action AND on-air |
+| `fire` | `#FF7A3D` | 🔥 banger side |
+| `slop` | `#B265FF` | 💩 slop side |
+| `telemetry` | `#9A9AA3` | live readouts — quiet, never glowing |
+| `vinyl` / groove | `#0E0E12` / `#202028` | the record |
 
-Artwork glow: a large-radius blur of the dominant artwork color at ~35%
-opacity behind the record (fallback: gold). This is the only "shadow" in the
-system — elevation is light, not darkness.
+**The spectrum** `#3D8BFF → #B265FF → #FF4FD8 → #FF7A3D` — sampled per-element
+via `samplePalette()` (no gradient dependency). Reserved for live music
+energy. Gradient pairs: `gradients.fire` `#FFB13D→#FF5E3A`, `gradients.slop`
+`#8B5CF6→#FF4FD8` (the vote tug's two ends).
+
+Elevation is light, not darkness: signal-colored glows (coral CTA bloom,
+artwork halo), never black drop-shadows.
 
 ### Type
 
 | Role | Spec | Use |
 | --- | --- | --- |
-| Display | 900 weight, uppercase, tracking −1%, leading 0.95 | track titles, OFF AIR |
-| Title | 800, sentence case | panel headers, artist |
+| Display | 800, sentence case, tracking −2%, leading 1.02 | track titles |
+| Prompt | 300, 26px, dim | empty states, onboarding questions |
+| Title | 700 | panel headers, artist |
 | Body | 400/600, 15px | chat, copy |
 | Caption | 600, 12px | handles, meta |
-| Telemetry | mono stack (`SF Mono`/`JetBrains Mono`/monospace), 11–12px, uppercase, tracking +8%, phosphor | timecode, counts, channel bug |
+| Telemetry | mono, 11px, uppercase, +8%, `telemetry` gray | timecode, counts, channel bug |
 
-### Geometry & space
+No all-caps display type in v2 — caps are reserved for telemetry.
 
-Radii: pills `999`, cards `24`, artwork tiles `16`, inner tiles `12`.
-Space scale: `4 · 8 · 12 · 16 · 24 · 32 · 48`. Desktop = rails + hero
-(chat left, boards right); <1024px = hero-first stack. Cards get a 1px
-`border` + a 4% cream top-edge highlight for the tactile lip.
+### Geometry
+
+Radii: pills `999`, cards `24`, tiles `12`. Space: `4·8·12·16·24·32·48`.
+Cards: 1px `border` + 4% white top-edge inner highlight. Desktop = chat rail +
+hero + boards rail; <1024px hero-first stack.
 
 ### Motion
 
 | Token | Spec | Use |
 | --- | --- | --- |
-| `rpm33` | 1800ms linear ∞ | vinyl spin (≈33⅓ rpm) |
-| `needleDrop` | 400ms cubic-bezier(.2,.8,.2,1) | track change enter |
-| `votePop` | spring, ~300ms, 1→1.35→1 | 🔥/💩 press |
-| `tallyShift` | 250ms ease-out | tug-of-war bar |
-| `onAirPulse` | 2s ease ∞, opacity .6↔1 | LIVE lamp dot |
+| `pressScale` | spring → 0.95, back on release | every touchable (`PressableScale`) |
+| `rpm33` | 1800ms linear ∞ | vinyl spin |
+| `needleDrop` | 0.94→1 spring + fade, ~400ms | track-change entrance |
+| `votePop` | spring 1→1.35→1 | 🔥/💩 press |
+| `onAirPulse` | 2s ease ∞ | ON AIR lamp |
+| waveform | staggered per-bar height loops, 260–600ms | the live progress element |
+| message enter | 220ms fade + 6px rise | chat |
 
-Respect reduced-motion: spin pauses, springs become fades.
+Reduced motion: spin pauses, springs become fades, waveform freezes at
+mid-height.
+
+### The waveform
+
+The signature element (`src/components/Waveform.tsx`): 27 bars, each
+animating its own height while the channel plays. The **played portion is lit
+in spectrum color** (sampled per bar — collectively one gradient), the
+remainder sits at 10% white. It *is* the progress bar; the mono timecode
+reads underneath.
 
 ## Voice
 
-Playful, irreverent, a little pirate-TV: "booed off the channel", "warming up
-the decks", "slop identity". Chrome copy is broadcast-terse and uppercase;
-chat-adjacent copy is lowercase and human. Emoji are functional vocabulary
-(🔥/💩), never decoration soup.
+Playful, irreverent, pirate-TV: "booed off the channel", "warming up the
+decks". Chrome copy is telemetry-terse; human copy is lowercase and warm.
+Emoji are functional vocabulary (🔥/💩), never decoration.
 
 ## Syncing to Claude Design
 
-`design-system/` cards each start with an `@dsCard` marker and are fully
-self-contained (inline CSS, no external requests) — the format Claude
-Design's DesignSync consumes. From a design-authorized session
-(`/design-login` in desktop Claude Code, or seed via Claude Design → "Send to
-Claude Code Web"), sync with: *"sync design-system/ to my TOTS Design System
-project"*. Iterate visually there; changes come back token-first through
+`design-system/` cards are self-contained with `@dsCard` markers — DesignSync
+format. From a design-authorized session (desktop `/design-login`, or Claude
+Design → "Send to Claude Code Web"), sync the directory to a design-system
+project; iterate visually there; bring decisions back token-first through
 `src/theme.ts`.

@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   channelBugText: {
-    color: colors.phosphor,
+    color: colors.telemetry,
     fontSize: type.micro,
     fontFamily: fonts.mono,
     letterSpacing: 2,

@@ -149,5 +149,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: space.sm + 2,
   },
-  saveText: { color: colors.bgSunken, fontWeight: '800', fontSize: type.body },
+  saveText: { color: '#FFFFFF', fontWeight: '800', fontSize: type.body },
 });

@@ -11,6 +11,36 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.4.0] — 2026-07-04 — "Signal" design language v2 + motion system
+
+Premium-modern redesign pass against the product owner's reference set
+(Beat, Muzaic screenshots).
+
+### Added
+- **Motion primitives** — `PressableScale` (spring press physics, →0.95, on
+  every touchable) and `Waveform` (27-bar animated live waveform; played bars
+  lit in spectrum color, doubles as the progress element).
+  → `src/ui/PressableScale.tsx`, `src/components/Waveform.tsx`
+- **Interaction states** — needle-drop track entrance (0.94→1 spring + fade),
+  glowing coral CTA, chat message entrances (fade + rise), vote pop retained.
+- **The spectrum** — `#3D8BFF→#B265FF→#FF4FD8→#FF7A3D`, sampled per-element
+  via `samplePalette()` (no gradient dependency); reserved exclusively for
+  live music energy (waveform, gradient vote tug).
+
+### Changed
+- **Palette v2:** warm brown-black/gold/phosphor → neutral rich black
+  (`#0A0A0C`), single coral signal (`#FF4655` = action + on-air),
+  fire `#FF7A3D` / slop `#B265FF`, neutral `telemetry` gray replaces
+  phosphor green. Type: sentence-case 800 display (caps now reserved for
+  telemetry), light 300 prompt register added.
+- Design-system cards + `docs/DESIGN.md` regenerated as **Signal v2**;
+  chat handles quieted to neutral (signal color reserved for self + actions).
+
+### Versioning
+- Manifests bumped to `0.4.0`.
+
+---
+
 ## [0.3.0] — 2026-07-04 — "Broadcast Vinyl" design system
 
 ### Added

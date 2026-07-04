@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,6 +12,25 @@ import {
 import { sendChatMessage, subscribeChat } from '../chat/chatClient';
 import { colors, fonts, radius, space, type } from '../theme';
 import type { AppConfig, ChatMessage, UserProfile } from '../types';
+import { PressableScale } from '../ui/PressableScale';
+
+/** Each message lands with a small rise + fade — the room feels alive. */
+function MessageEnter({ children }: { children: React.ReactNode }) {
+  const anim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(anim, { toValue: 1, duration: 220, useNativeDriver: true }).start();
+  }, []);
+  return (
+    <Animated.View
+      style={{
+        opacity: anim,
+        transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [6, 0] }) }],
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+}
 
 interface Props {
   profile: UserProfile | null;
@@ -82,22 +102,24 @@ export function ChatPanel({ profile, config }: Props) {
             contentContainerStyle={{ gap: space.sm, paddingVertical: space.sm }}
           >
             {visible.map((m) => (
-              <Pressable key={m.id} onLongPress={() => toggleMute(m.userId)}>
-                <View style={styles.messageRow}>
-                  <Text style={styles.messageAvatar}>{m.avatar}</Text>
-                  <View style={styles.messageBody}>
-                    <Text
-                      style={[
-                        styles.messageHandle,
-                        profile?.uid === m.userId && styles.messageHandleSelf,
-                      ]}
-                    >
-                      {m.handle}
-                    </Text>
-                    <Text style={styles.messageText}>{m.text}</Text>
+              <MessageEnter key={m.id}>
+                <Pressable onLongPress={() => toggleMute(m.userId)}>
+                  <View style={styles.messageRow}>
+                    <Text style={styles.messageAvatar}>{m.avatar}</Text>
+                    <View style={styles.messageBody}>
+                      <Text
+                        style={[
+                          styles.messageHandle,
+                          profile?.uid === m.userId && styles.messageHandleSelf,
+                        ]}
+                      >
+                        {m.handle}
+                      </Text>
+                      <Text style={styles.messageText}>{m.text}</Text>
+                    </View>
                   </View>
-                </View>
-              </Pressable>
+                </Pressable>
+              </MessageEnter>
             ))}
             {muted.size > 0 && (
               <Text style={styles.mutedNote}>
@@ -120,12 +142,12 @@ export function ChatPanel({ profile, config }: Props) {
               onSubmitEditing={send}
               blurOnSubmit={false}
             />
-            <Pressable
-              style={[styles.sendButton, !draft.trim() && styles.sendDisabled]}
+            <PressableScale
+              style={StyleSheet.flatten([styles.sendButton, !draft.trim() && styles.sendDisabled])}
               onPress={send}
             >
               <Text style={styles.sendText}>↑</Text>
-            </Pressable>
+            </PressableScale>
           </View>
         </>
       )}
@@ -153,7 +175,7 @@ const styles = StyleSheet.create({
   liveDotWrap: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.live },
   headerMeta: {
-    color: colors.phosphor,
+    color: colors.telemetry,
     fontSize: type.micro,
     fontFamily: fonts.mono,
     letterSpacing: 1,
@@ -162,8 +184,8 @@ const styles = StyleSheet.create({
   messageRow: { flexDirection: 'row', gap: space.sm, alignItems: 'flex-start' },
   messageAvatar: { fontSize: 16, marginTop: 1 },
   messageBody: { flex: 1 },
-  messageHandle: { color: colors.accent, fontSize: type.micro, fontWeight: '700' },
-  messageHandleSelf: { color: colors.fire },
+  messageHandle: { color: colors.textDim, fontSize: type.micro, fontWeight: '700' },
+  messageHandleSelf: { color: colors.accent },
   messageText: { color: colors.text, fontSize: type.caption, lineHeight: 18 },
   mutedNote: { color: colors.textFaint, fontSize: type.micro, fontStyle: 'italic' },
   notice: { color: colors.slop, fontSize: type.micro, marginBottom: space.xs },
@@ -188,7 +210,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sendDisabled: { opacity: 0.35 },
-  sendText: { color: colors.bgSunken, fontWeight: '900', fontSize: 16 },
+  sendText: { color: '#FFFFFF', fontWeight: '900', fontSize: 16 },
   killSwitch: {
     flex: 1,
     alignItems: 'center',
