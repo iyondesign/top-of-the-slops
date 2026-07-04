@@ -1,25 +1,40 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 
-import { samplePalette, spectrum } from '../theme';
+import { gradients, samplePalette, spectrum } from '../theme';
 
 interface Props {
   width: number;
-  /** 0..1 — played portion lights up in spectrum color, rest stays dim. */
+  /** 0..1 — played portion lights up, rest stays dim. */
   progress: number;
   isPlaying: boolean;
   height?: number;
   barCount?: number;
+  /**
+   * Vote integration (VotePlaybackBar): when the play has votes, the lit
+   * region recolors as the tug-of-war — fire gradient floods from the
+   * left, slop gradient from the right, crossover = the vote split.
+   * Without votes the lit region sings in spectrum color.
+   */
+  fireShare?: number;
+  hasVotes?: boolean;
 }
 
 /**
- * The live waveform — the spectrum's home (Muzaic-style gradient light on
- * black). Each bar animates its own height on a staggered loop while the
- * channel plays; the played portion is lit in spectrum color sampled per
- * bar (which collectively reads as one gradient), the unplayed remainder
- * stays hairline-dim. Doubles as the progress element.
+ * The live waveform — gradient light on black. Each bar animates its own
+ * height on a staggered loop while the channel plays; the played portion
+ * is lit (spectrum, or the vote tug when votes exist), the unplayed
+ * remainder stays hairline-dim. Doubles as the progress element.
  */
-export function Waveform({ width, progress, isPlaying, height = 30, barCount = 27 }: Props) {
+export function Waveform({
+  width,
+  progress,
+  isPlaying,
+  height = 30,
+  barCount = 27,
+  fireShare = 0.5,
+  hasVotes = false,
+}: Props) {
   const bars = useRef(
     Array.from({ length: barCount }, () => new Animated.Value(0.3 + Math.random() * 0.5)),
   ).current;
@@ -54,13 +69,29 @@ export function Waveform({ width, progress, isPlaying, height = 30, barCount = 2
       {bars.map((bar, i) => {
         const t = i / (barCount - 1);
         const lit = t <= progress;
+        let color = 'rgba(255,255,255,0.10)';
+        if (lit) {
+          if (!hasVotes) {
+            color = samplePalette(spectrum, t);
+          } else {
+            // Position within the lit region drives the tug coloring.
+            const local = progress === 0 ? 0 : t / progress;
+            color =
+              local <= fireShare
+                ? samplePalette(gradients.fire, fireShare === 0 ? 0 : local / fireShare)
+                : samplePalette(
+                    gradients.slop,
+                    (local - fireShare) / Math.max(1 - fireShare, 0.0001),
+                  );
+          }
+        }
         return (
           <Animated.View
             key={i}
             style={{
               width: barWidth,
               borderRadius: barWidth / 2,
-              backgroundColor: lit ? samplePalette(spectrum, t) : 'rgba(255,255,255,0.10)',
+              backgroundColor: color,
               height: bar.interpolate({
                 inputRange: [0, 1],
                 outputRange: [3, height],

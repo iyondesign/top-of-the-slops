@@ -1,31 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { devSetAppConfig, serverNow, subscribeBooedOff } from '../channel/channelClient';
+import { devSetAppConfig, subscribeBooedOff } from '../channel/channelClient';
 import { colors, fonts, motion, radius, space, type } from '../theme';
 import type { ChannelState, Track, UserProfile } from '../types';
-import { PressableScale } from '../ui/PressableScale';
-import { VoteBar } from './VoteBar';
-import { Waveform } from './Waveform';
+import { VotePlaybackBar } from './VotePlaybackBar';
 
 interface Props {
   state: ChannelState;
   track: Track | null;
   size: number;
-  listeningEnabled: boolean;
-  onTuneIn: () => void;
   profile: UserProfile | null;
   /** Dominant artwork color — re-lights the glow + spindle per track. */
   tint: string;
 }
 
 /**
- * The Now Playing hero: spinning record under a soft signal glow, live
- * waveform as the progress element, telemetry rail, votes. Track changes
- * enter with the needle-drop (scale 0.94→1 spring + fade). Long-press
+ * The Now Playing hero: spinning record under a soft signal glow, one
+ * line of title · artist, and the smart VotePlaybackBar (playback +
+ * vote tug fused). Track changes enter with the needle-drop. Long-press
  * the ON AIR pill to flip the dev off-air failsafe.
  */
-export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, profile, tint }: Props) {
+export function VinylHero({ state, track, size, profile, tint }: Props) {
   const spin = useRef(new Animated.Value(0)).current;
   const lamp = useRef(new Animated.Value(1)).current;
   const drop = useRef(new Animated.Value(1)).current;
@@ -137,16 +133,12 @@ export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, prof
         </Animated.View>
       </Animated.View>
 
-      <Text style={styles.title} numberOfLines={2}>
+      <Text style={styles.trackLine} numberOfLines={1}>
         {track?.title ?? 'Dropping the needle…'}
-      </Text>
-      <Text style={styles.artist} numberOfLines={1}>
-        {track?.artist ?? ''}
+        {track?.artist ? <Text style={styles.artistInline}>  ·  {track.artist}</Text> : null}
       </Text>
 
-      <LiveProgress state={state} width={size} />
-
-      <VoteBar state={state} profile={profile} />
+      <VotePlaybackBar state={state} profile={profile} width={size + 56} />
 
       {booed && (
         <View style={styles.booedBanner}>
@@ -155,47 +147,8 @@ export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, prof
           </Text>
         </View>
       )}
-
-      {!listeningEnabled && (
-        <PressableScale style={styles.tuneIn} onPress={onTuneIn}>
-          <Text style={styles.tuneInText}>▶ Tap to tune in</Text>
-        </PressableScale>
-      )}
     </View>
   );
-}
-
-function LiveProgress({ state, width }: { state: ChannelState; width: number }) {
-  const [elapsedMs, setElapsedMs] = useState(0);
-
-  useEffect(() => {
-    const tick = () => {
-      setElapsedMs(Math.max(0, serverNow() - state.startedAtServerMs));
-    };
-    tick();
-    const timer = setInterval(tick, 500);
-    return () => clearInterval(timer);
-  }, [state.startedAtServerMs, state.durationMs]);
-
-  const progress = Math.min(1, elapsedMs / state.durationMs);
-  return (
-    <View style={{ width }}>
-      <Waveform width={width} progress={progress} isPlaying={state.isPlaying} />
-      <View style={styles.timecodeRow}>
-        <Text style={styles.timecode}>
-          {formatMs(Math.min(elapsedMs, state.durationMs))} / {formatMs(state.durationMs)}
-        </Text>
-        <Text style={styles.channelBug}>TOTS•01</Text>
-      </View>
-    </View>
-  );
-}
-
-function formatMs(ms: number): string {
-  const total = Math.floor(ms / 1000);
-  const m = Math.floor(total / 60);
-  const s = total % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
 const styles = StyleSheet.create({
@@ -221,9 +174,7 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: 'absolute',
-    backgroundColor: colors.accent,
     opacity: 0.1,
-    shadowColor: colors.accent,
     shadowOpacity: 0.5,
     shadowRadius: 70,
     shadowOffset: { width: 0, height: 0 },
@@ -254,38 +205,19 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: colors.bgSunken,
     borderWidth: 2,
-    borderColor: colors.vinylLabel,
   },
-  title: {
+  trackLine: {
     color: colors.text,
-    fontSize: type.hero,
+    fontSize: type.hero - 6,
     fontFamily: fonts.display,
     textAlign: 'center',
-    maxWidth: 480,
-    letterSpacing: -0.6,
+    maxWidth: 560,
+    letterSpacing: -0.5,
   },
-  artist: {
+  artistInline: {
     color: colors.textDim,
-    fontSize: type.title - 2,
+    fontSize: type.title - 3,
     fontFamily: fonts.displayMedium,
-    textAlign: 'center',
-  },
-  timecodeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
-  timecode: {
-    color: colors.telemetry,
-    fontSize: type.micro,
-    fontFamily: fonts.mono,
-    letterSpacing: 1,
-  },
-  channelBug: {
-    color: colors.textFaint,
-    fontSize: type.micro,
-    fontFamily: fonts.mono,
-    letterSpacing: 2,
   },
   booedBanner: {
     backgroundColor: 'rgba(178, 101, 255, 0.16)',
@@ -296,15 +228,4 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   booedText: { color: colors.slop, fontSize: type.caption, fontWeight: '700' },
-  tuneIn: {
-    backgroundColor: colors.accent,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.sm + 4,
-    borderRadius: radius.full,
-    shadowColor: colors.accent,
-    shadowOpacity: 0.45,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 0 },
-  },
-  tuneInText: { color: '#FFFFFF', fontFamily: fonts.display, fontSize: type.body },
 });

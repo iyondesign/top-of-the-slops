@@ -128,13 +128,18 @@ sheets, wells) — glass is for panels floating over the ambience.
 Reduced motion: spin pauses, springs become fades, waveform freezes at
 mid-height.
 
-### The waveform
+### The smart bar (VotePlaybackBar)
 
-The signature element (`src/components/Waveform.tsx`): 27 bars, each
-animating its own height while the channel plays. The **played portion is lit
-in spectrum color** (sampled per bar — collectively one gradient), the
-remainder sits at 10% white. It *is* the progress bar; the mono timecode
-reads underneath.
+The signature element (`src/components/VotePlaybackBar.tsx` +
+`Waveform.tsx`): playback and the vote tug fused into ONE line. The 🔥 pill
+anchors the waveform's left end, 💩 anchors the right; 27 bars animate their
+heights while the channel plays. **Lit length = playback progress; within
+the lit region the fire gradient floods from the left and slop from the
+right — the crossover is the vote split.** Before any votes land, the lit
+region sings in spectrum color. Underneath, one telemetry row: timecode ·
+vote hint (ONE CALL PER PLAY / BANGER, CALLED) · channel bug. The Tune In
+CTA lives in the global nav (left of the profile chip), keeping the stage
+clear.
 
 ## Brand
 

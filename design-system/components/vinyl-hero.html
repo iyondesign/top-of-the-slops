@@ -1,43 +1,37 @@
-<!-- @dsCard group="Components" name="Vinyl hero — Now Playing" -->
+<!-- @dsCard group="Components" name="Vinyl hero + smart VotePlaybackBar" -->
 <style>
 :root{--bg:#0A0A0C;--raised:#131318;--sunken:#050507;--border:rgba(255,255,255,.07);--text:#F7F7F8;--dim:#A0A0AA;--faint:#62626C;--accent:#FF4655;--accent-soft:rgba(255,70,85,.15);--fire:#FF7A3D;--slop:#B265FF;--tele:#9A9AA3;--vinyl:#0E0E12;--groove:#202028;--mono:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace}
 *{margin:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Display','Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:32px;display:flex;justify-content:center}
-.hero{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:460px}
-.pills{display:flex;gap:8px}
+.hero{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:500px}
 .onair{display:flex;align-items:center;gap:7px;border:1px solid var(--accent);background:var(--accent-soft);padding:7px 16px;border-radius:999px}
 .onair i{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite;box-shadow:0 0 12px rgba(255,70,85,.7)}
 @keyframes pulse{50%{opacity:.5}}
 .onair b{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--accent)}
-.tele{display:flex;align-items:center;background:var(--raised);border:1px solid var(--border);padding:7px 16px;border-radius:999px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--tele)}
-.stage{position:relative;width:340px;height:340px;display:flex;align-items:center;justify-content:center}
+.stage{position:relative;width:320px;height:320px;display:flex;align-items:center;justify-content:center}
 .glow{position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle,rgba(255,70,85,.30),transparent 70%);filter:blur(30px)}
-.record{position:relative;width:320px;height:320px;border-radius:50%;background:var(--vinyl);border:1px solid var(--groove);display:flex;align-items:center;justify-content:center;animation:rpm33 1.8s linear infinite}
+.record{position:relative;width:300px;height:300px;border-radius:50%;background:var(--vinyl);border:1px solid var(--groove);display:flex;align-items:center;justify-content:center;animation:rpm33 1.8s linear infinite}
 @keyframes rpm33{to{transform:rotate(360deg)}}
 .g{position:absolute;border-radius:50%;border:1px solid var(--groove)}
-.art{width:198px;height:198px;border-radius:50%;overflow:hidden;background:conic-gradient(from 210deg,#3D8BFF,#B265FF,#FF4FD8,#FF7A3D,#3D8BFF)}
+.art{width:186px;height:186px;border-radius:50%;overflow:hidden;background:conic-gradient(from 210deg,#3D8BFF,#B265FF,#FF4FD8,#FF7A3D,#3D8BFF)}
 .spindle{position:absolute;width:13px;height:13px;border-radius:50%;background:var(--sunken);border:2px solid var(--accent)}
-.tt{font-size:38px;font-weight:800;letter-spacing:-.02em;line-height:1.02;text-align:center}
-.ar{font-size:18px;font-weight:600;color:var(--dim)}
-.wavewrap{width:340px}
-.wave{display:flex;align-items:center;justify-content:space-between;height:30px}
-.wave i{display:block;width:6px;border-radius:3px;animation:eq 1s ease-in-out infinite}
-@keyframes eq{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
-.tc{display:flex;justify-content:space-between;margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--tele)}
-.tc span:last-child{color:var(--faint)}
-.votes{display:flex;align-items:center;gap:14px}
-.v{display:flex;align-items:center;gap:7px;padding:9px 18px;border-radius:999px;border:1px solid;font-weight:800;font-size:15px}
+.tt{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.05;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:480px}
+.tt span{font-size:17px;font-weight:500;color:var(--dim)}
+.smart{width:460px}
+.bar{display:flex;align-items:center;gap:10px}
+.v{display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:999px;border:1px solid;font-weight:800;font-size:13px}
 .vf{border-color:var(--fire);background:rgba(255,122,61,.1);color:var(--fire)}
 .vs{border-color:var(--slop);background:rgba(178,101,255,.1);color:var(--slop)}
-.tug{display:flex;width:132px;height:8px;border-radius:4px;overflow:hidden;gap:1px}
-.tug i{flex:1}
-.cta{background:var(--accent);color:#fff;font-weight:800;font-size:15px;padding:13px 28px;border-radius:999px;box-shadow:0 0 34px rgba(255,70,85,.4)}
+.wave{flex:1;display:flex;align-items:center;justify-content:space-between;height:30px}
+.wave i{display:block;width:5px;border-radius:3px;animation:eq 1s ease-in-out infinite}
+@keyframes eq{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
+.tc{display:flex;justify-content:space-between;margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--tele)}
+.tc .hint{color:var(--faint)}
+.note{margin-top:24px;max-width:460px;padding:14px 16px;border:1px solid var(--border);border-radius:18px;background:var(--raised);color:var(--dim);font-size:12px;line-height:1.6}
+.note b{color:var(--text)}
 </style>
 <div class="hero">
-  <div class="pills">
-    <div class="onair"><i></i><b>ON AIR</b></div>
-    <div class="tele">TOTS•01 · 26 IN THE ROOM</div>
-  </div>
+  <div class="onair"><i></i><b>ON AIR</b></div>
   <div class="stage">
     <div class="glow"></div>
     <div class="record">
@@ -46,19 +40,17 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,'SF Pro Di
       <div class="spindle"></div>
     </div>
   </div>
-  <div class="tt">Banger Protocol</div>
-  <div class="ar">VJAI &amp; The Countdown</div>
-  <div class="wavewrap">
-    <div class="wave">
-      <i style="background:#3D8BFF;height:22px;animation-delay:0s"></i><i style="background:#557FFF;height:28px;animation-delay:.06s"></i><i style="background:#6E78FF;height:16px;animation-delay:.12s"></i><i style="background:#8770FF;height:30px;animation-delay:.18s"></i><i style="background:#A068FF;height:20px;animation-delay:.24s"></i><i style="background:#B265FF;height:26px;animation-delay:.3s"></i><i style="background:#C95FE9;height:30px;animation-delay:.36s"></i><i style="background:#E057E0;height:18px;animation-delay:.42s"></i><i style="background:#FF4FD8;height:28px;animation-delay:.48s"></i><i style="background:#FF57BE;height:22px;animation-delay:.54s"></i><i style="background:#FF60A0;height:30px;animation-delay:.6s"></i><i style="background:#FF6A80;height:16px;animation-delay:.66s"></i><i style="background:#FF7260;height:24px;animation-delay:.72s"></i><i style="background:#FF7A3D;height:28px;animation-delay:.78s"></i>
-      <i style="background:rgba(255,255,255,.1);height:18px"></i><i style="background:rgba(255,255,255,.1);height:26px"></i><i style="background:rgba(255,255,255,.1);height:14px"></i><i style="background:rgba(255,255,255,.1);height:22px"></i><i style="background:rgba(255,255,255,.1);height:16px"></i><i style="background:rgba(255,255,255,.1);height:24px"></i><i style="background:rgba(255,255,255,.1);height:12px"></i><i style="background:rgba(255,255,255,.1);height:20px"></i><i style="background:rgba(255,255,255,.1);height:26px"></i><i style="background:rgba(255,255,255,.1);height:14px"></i><i style="background:rgba(255,255,255,.1);height:18px"></i><i style="background:rgba(255,255,255,.1);height:22px"></i><i style="background:rgba(255,255,255,.1);height:12px"></i>
+  <div class="tt">Banger Protocol <span>· VJAI &amp; The Countdown</span></div>
+  <div class="smart">
+    <div class="bar">
+      <div class="v vf">🔥 12</div>
+      <div class="wave">
+        <i style="background:#FFB13D;height:20px;animation-delay:0s"></i><i style="background:#FFA43C;height:26px;animation-delay:.06s"></i><i style="background:#FF973B;height:16px;animation-delay:.12s"></i><i style="background:#FF8A3B;height:28px;animation-delay:.18s"></i><i style="background:#FF7D3A;height:22px;animation-delay:.24s"></i><i style="background:#FF703A;height:26px;animation-delay:.3s"></i><i style="background:#FF663A;height:28px;animation-delay:.36s"></i><i style="background:#FF5E3A;height:18px;animation-delay:.42s"></i><i style="background:#FF5E3A;height:24px;animation-delay:.48s"></i><i style="background:#FF5E3A;height:28px;animation-delay:.54s"></i><i style="background:#8B5CF6;height:22px;animation-delay:.6s"></i><i style="background:#B356EE;height:26px;animation-delay:.66s"></i><i style="background:#DB51E3;height:18px;animation-delay:.72s"></i><i style="background:#FF4FD8;height:24px;animation-delay:.78s"></i>
+        <i style="background:rgba(255,255,255,.1);height:16px"></i><i style="background:rgba(255,255,255,.1);height:24px"></i><i style="background:rgba(255,255,255,.1);height:12px"></i><i style="background:rgba(255,255,255,.1);height:20px"></i><i style="background:rgba(255,255,255,.1);height:14px"></i><i style="background:rgba(255,255,255,.1);height:22px"></i><i style="background:rgba(255,255,255,.1);height:18px"></i>
+      </div>
+      <div class="v vs">💩 4</div>
     </div>
-    <div class="tc"><span>00:14 / 00:30</span><span>TOTS•01</span></div>
+    <div class="tc"><span>00:14 / 00:30</span><span class="hint">ONE CALL PER PLAY</span><span>TOTS•01</span></div>
   </div>
-  <div class="votes">
-    <div class="v vf">🔥 12</div>
-    <div class="tug"><i style="background:#FFB13D"></i><i style="background:#FFA13C"></i><i style="background:#FF913B"></i><i style="background:#FF823A"></i><i style="background:#FF723A"></i><i style="background:#FF6539"></i><i style="background:#FF5E3A"></i><i style="background:#8B5CF6"></i><i style="background:#A159F1"></i><i style="background:#B756EC"></i><i style="background:#CD53E7"></i><i style="background:#E350E2"></i><i style="background:#F94DDD"></i><i style="background:#FF4FD8"></i></div>
-    <div class="v vs">💩 4</div>
-  </div>
-  <div class="cta">▶ Tap to tune in</div>
+  <div class="note"><b>VotePlaybackBar:</b> playback + votes fused into one line. Lit length = progress; within it, the fire gradient floods from the left and slop from the right — the crossover IS the vote split (12🔥 : 4💩 above ≈ 75%). No votes yet → the lit region sings in spectrum instead. Pills pop on press and lock after one call per play; timecode, hint, and channel bug share one telemetry row.</div>
 </div>

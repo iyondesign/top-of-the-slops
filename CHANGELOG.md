@@ -11,6 +11,30 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.8.0] — 2026-07-04 — VotePlaybackBar: playback + votes as one smart line
+
+### Added
+- **`VotePlaybackBar`** — the smart bar fusing progress and the vote
+  tug-of-war: 🔥 pill anchors the waveform's left end, 💩 the right; lit
+  length = playback progress, and within it the fire gradient floods from
+  the left while slop floods from the right — **the crossover is the vote
+  split**. Spectrum coloring until the first vote lands. One telemetry row
+  underneath (timecode · vote hint · channel bug). Replaces the separate
+  progress + vote rows. → `src/components/VotePlaybackBar.tsx`
+
+### Changed
+- Hero: track title + artist collapsed to one line ("Title · Artist");
+  needle-drop, glow tint, and booed-off banner unchanged.
+- **Tune In moved to the global nav**, left of the profile chip — compact
+  coral pill; the stage keeps zero chrome.
+- `Waveform` gained `fireShare`/`hasVotes` for tug coloring; design-system
+  hero card + DESIGN.md updated to the smart bar.
+
+### Removed
+- `VoteBar.tsx` (absorbed into `VotePlaybackBar`).
+
+---
+
 ## [0.7.1] — 2026-07-04 — Room header: one line
 
 ### Changed

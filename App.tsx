@@ -27,6 +27,7 @@ import { useAppConfig, useChannelState, useCurrentTrack } from './src/hooks/useC
 import { useIdentity } from './src/hooks/useIdentity';
 import { usePlayback } from './src/hooks/usePlayback';
 import { colors, DESKTOP_BREAKPOINT, fonts, radius, space, type } from './src/theme';
+import { PressableScale } from './src/ui/PressableScale';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -53,15 +54,7 @@ export default function App() {
   const hero = !config.isLive ? (
     <OffAirCard size={heroSize} />
   ) : state ? (
-    <VinylHero
-      state={state}
-      track={track}
-      size={heroSize}
-      listeningEnabled={enabled}
-      onTuneIn={enable}
-      profile={profile}
-      tint={tint}
-    />
+    <VinylHero state={state} track={track} size={heroSize} profile={profile} tint={tint} />
   ) : (
     <Text style={styles.loading}>Warming up the decks…</Text>
   );
@@ -82,7 +75,14 @@ export default function App() {
             <Text style={styles.channelBugText}>TOTS•01</Text>
           </View>
         </View>
-        {profile && <ProfileEditor profile={profile} onUpdate={update} />}
+        <View style={styles.navRight}>
+          {!enabled && config.isLive && state && (
+            <PressableScale style={styles.tuneIn} onPress={enable}>
+              <Text style={styles.tuneInText}>▶ Tune in</Text>
+            </PressableScale>
+          )}
+          {profile && <ProfileEditor profile={profile} onUpdate={update} />}
+        </View>
       </View>
 
       {isDesktop ? (
@@ -116,6 +116,18 @@ const styles = StyleSheet.create({
     paddingVertical: space.md,
   },
   brand: { flexDirection: 'row', alignItems: 'center', gap: space.md - 4 },
+  navRight: { flexDirection: 'row', alignItems: 'center', gap: space.sm + 2 },
+  tuneIn: {
+    backgroundColor: colors.accent,
+    paddingHorizontal: space.md,
+    paddingVertical: 7,
+    borderRadius: radius.full,
+    shadowColor: colors.accent,
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 0 },
+  },
+  tuneInText: { color: '#FFFFFF', fontFamily: fonts.display, fontSize: type.caption },
   channelBug: {
     borderWidth: 1,
     borderColor: colors.border,
