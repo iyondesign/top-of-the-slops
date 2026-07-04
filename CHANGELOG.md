@@ -11,6 +11,32 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.15.1] — 2026-07-04 — Boundary sync, instant queue feedback, persistent contributions
+
+### Fixed
+- **Audio now switches in step with the visuals** at track boundaries:
+  the next track's audio is **preloaded** while the current one plays
+  (we know what's On Deck) and handed off **gaplessly** — the old element
+  keeps playing until the new one is actually rolling, killing the
+  "visuals changed but the song lags" gap (preview path).
+- **Contributions survive refresh**: your pool additions persist locally
+  (AsyncStorage) and re-merge after hydration. (Truly shared, room-level
+  persistence arrives with the M2 conductor — this is the stub-mode
+  equivalent for your own adds.)
+- Requested-song visibility: covered by 0.15.0's queue-jump (requests
+  insert right after the current track); On Deck recomputes on open.
+
+### Added
+- **Dev metadata explorer**: every track change logs the pool track AND
+  the full raw Apple catalog resource (attributes + artist/album
+  relationships) to the console (`__DEV__` only) — browse exactly what
+  Apple exposes per song. → `getRawMetadata` / `fetchRawMetadata`
+
+### Versioning
+- Manifests bumped to `0.15.1`.
+
+---
+
 ## [0.15.0] — 2026-07-04 — Hover controls, queue-jump requests, artist backdrops
 
 ### Fixed

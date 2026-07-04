@@ -29,6 +29,7 @@ import { useArtworkTint } from './src/hooks/useArtworkTint';
 import { useAppConfig, useChannelState, useCurrentTrack } from './src/hooks/useChannel';
 import { useIdentity } from './src/hooks/useIdentity';
 import { usePlayback } from './src/hooks/usePlayback';
+import { fetchRawMetadata, isAppleConfigured } from './src/music';
 import { colors, DESKTOP_BREAKPOINT, fonts, radius, space, type } from './src/theme';
 import { PressableScale } from './src/ui/PressableScale';
 
@@ -48,6 +49,19 @@ export default function App() {
   const { enabled, enable, muted, toggleMute } = usePlayback(state, config);
   const tint = useArtworkTint(track?.artworkUrl);
   const backdropUrl = useArtistArtwork(track);
+
+  // Dev metadata explorer: on every track change, log what we know from
+  // the pool AND the full raw Apple catalog resource (attributes +
+  // artist/album relationships) so it's browsable in the console.
+  useEffect(() => {
+    if (!__DEV__ || !track) return;
+    console.log(`[tots] ▶ now playing — pool track:`, track);
+    if (isAppleConfigured() && track.source === 'apple') {
+      void fetchRawMetadata(track.id).then((raw) => {
+        if (raw) console.log(`[tots] 🍎 full Apple catalog metadata for "${track.title}":`, raw);
+      });
+    }
+  }, [track?.id]);
 
   useEffect(() => {
     if (profile && !profile.uid.startsWith('local-')) attachPresence(profile.uid);

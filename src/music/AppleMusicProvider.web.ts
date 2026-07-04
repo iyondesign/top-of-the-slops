@@ -319,6 +319,19 @@ export class AppleMusicProvider implements MusicProvider {
     return true;
   }
 
+  /** Full raw song resource incl. artist + album relationships. */
+  async getRawMetadata(trackId: string): Promise<unknown | null> {
+    try {
+      const music = await this.music();
+      const res = await music.api.music(`/v1/catalog/{{storefrontId}}/songs/${trackId}`, {
+        include: 'artists,albums',
+      });
+      return res?.data?.data?.[0] ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   private artistArtCache = new Map<string, string | null>();
 
   /**

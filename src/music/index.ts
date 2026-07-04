@@ -95,6 +95,17 @@ export async function fetchArtistArtwork(trackId: string): Promise<string | null
   }
 }
 
+/** Raw catalog resource for dev metadata exploration. */
+export async function fetchRawMetadata(trackId: string): Promise<unknown | null> {
+  const { provider } = getMusicMachine();
+  if (!provider.getRawMetadata) return null;
+  try {
+    return await provider.getRawMetadata(trackId);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * ONE shared music machine for the whole app — the playback loop and the
  * "Connect Apple Music" flow must drive the same provider instance so

@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import type {
   AppConfig,
   ChannelState,
@@ -7,6 +9,10 @@ import type {
   TrackBoardEntry,
   VoteValue,
 } from '../types';
+
+/** Contributions survive refresh (room-level for real once M2's conductor
+ * owns the pool; locally persisted in stub mode so YOUR adds stick). */
+const CONTRIBUTIONS_KEY = 'tots.poolContributions.v1';
 import { trackPlayId } from '../types';
 
 /**
@@ -83,7 +89,8 @@ export class StubChannel {
   start(): void {
     if (this.started) return;
     this.started = true;
-    void this.hydratePool().then(() => {
+    void this.hydratePool().then(async () => {
+      await this.restoreContributions();
       this.advance();
       // Ambient liveliness (plan §9): listener drift + simulated crowd
       // votes so tallies and boards move in dev. Replaced by real
@@ -125,8 +132,49 @@ export class StubChannel {
     next.splice(Math.min(this.poolIndex + 1, next.length), 0, clamped);
     this.pool = next;
     this.addedAtMs.set(track.id, Date.now());
+    this.contributions.push(clamped);
+    void this.persistContributions();
     this.trackListeners.forEach((l) => l(this.pool));
     return true;
+  }
+
+  private contributions: Track[] = [];
+
+  private async persistContributions(): Promise<void> {
+    try {
+      await AsyncStorage.setItem(
+        CONTRIBUTIONS_KEY,
+        JSON.stringify(
+          this.contributions.map((track) => ({
+            track,
+            addedAtMs: this.addedAtMs.get(track.id) ?? Date.now(),
+          })),
+        ),
+      );
+    } catch {
+      // Non-fatal: contributions just won't survive reload.
+    }
+  }
+
+  /** Re-merge saved contributions after hydration replaces the pool. */
+  private async restoreContributions(): Promise<void> {
+    try {
+      const raw = await AsyncStorage.getItem(CONTRIBUTIONS_KEY);
+      if (!raw) return;
+      const saved: Array<{ track: Track; addedAtMs: number }> = JSON.parse(raw);
+      let changed = false;
+      for (const { track, addedAtMs } of saved) {
+        this.contributions.push(track);
+        this.addedAtMs.set(track.id, addedAtMs);
+        if (!this.pool.some((t) => t.id === track.id)) {
+          this.pool = [...this.pool, track];
+          changed = true;
+        }
+      }
+      if (changed) this.trackListeners.forEach((l) => l(this.pool));
+    } catch {
+      // Corrupt store — ignore.
+    }
   }
 
   private addedAtMs = new Map<string, number>();

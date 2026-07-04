@@ -27,6 +27,21 @@ export class PreviewMusicProvider implements MusicProvider {
     for (const t of tracks) this.tracks.set(t.id, t);
   }
 
+  private preloaded: { id: string; el: HTMLAudioElement } | null = null;
+
+  /**
+   * Buffer the next track's audio while the current one plays, so the
+   * audible switch lands with the visual one instead of seconds later.
+   */
+  preload(track: Track): void {
+    if (typeof Audio === 'undefined' || !track.previewUrl) return;
+    if (this.preloaded?.id === track.id) return;
+    const el = new Audio(track.previewUrl);
+    el.preload = 'auto';
+    el.loop = true;
+    this.preloaded = { id: track.id, el };
+  }
+
   async authorize(): Promise<MusicTier> {
     return 'preview';
   }
@@ -58,14 +73,27 @@ export class PreviewMusicProvider implements MusicProvider {
     const previewPositionMs = positionMs % 30_000;
 
     if (typeof Audio !== 'undefined' && previewUrl) {
-      if (!this.audio || this.audio.src !== previewUrl) {
-        this.audio?.pause();
-        this.audio = new Audio(previewUrl);
-        this.audio.loop = true;
+      if (this.preloaded?.id === trackId) {
+        // Gapless handoff: the buffered next element starts before the
+        // old one stops, so there's no dead air at the boundary.
+        const next = this.preloaded.el;
+        this.preloaded = null;
+        next.muted = this.muted;
+        next.currentTime = previewPositionMs / 1000;
+        const old = this.audio;
+        this.audio = next;
+        await next.play();
+        old?.pause();
+      } else {
+        if (!this.audio || this.audio.src !== previewUrl) {
+          this.audio?.pause();
+          this.audio = new Audio(previewUrl);
+          this.audio.loop = true;
+        }
+        this.audio.muted = this.muted;
+        this.audio.currentTime = previewPositionMs / 1000;
+        await this.audio.play();
       }
-      this.audio.muted = this.muted;
-      this.audio.currentTime = previewPositionMs / 1000;
-      await this.audio.play();
     }
     this.clockOffsetMs = positionMs;
     this.clockStartedAt = Date.now();

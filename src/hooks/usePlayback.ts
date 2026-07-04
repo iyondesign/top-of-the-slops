@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { serverNow, subscribeTrackPool } from '../channel/channelClient';
+import { getUpNext, serverNow, subscribeTrackPool } from '../channel/channelClient';
 import { DRIFT_TOLERANCE_MS, getMusicMachine } from '../music';
 import type { AppConfig, ChannelState } from '../types';
 
@@ -64,6 +64,14 @@ export function usePlayback(state: ChannelState | null, config: AppConfig) {
     let disposed = false;
     void syncTo();
 
+    // Buffer what's On Deck so the next boundary switches audibly in
+    // step with the visuals (preview path; a couple seconds in, once
+    // the current track is rolling).
+    const preloadTimer = setTimeout(() => {
+      const next = getUpNext(1)[0];
+      if (next) machine.current.preview.preload(next);
+    }, 2_500);
+
     const driftTimer = setInterval(() => {
       if (disposed) return;
       const s = stateRef.current;
@@ -98,6 +106,7 @@ export function usePlayback(state: ChannelState | null, config: AppConfig) {
     return () => {
       disposed = true;
       clearInterval(driftTimer);
+      clearTimeout(preloadTimer);
     };
   }, [enabled, config.isLive, state?.currentTrackId, state?.startedAtServerMs, state?.isPlaying]);
 

@@ -41,6 +41,10 @@ export interface MusicProvider {
   /** The track's primary ARTIST imagery (not album art) for the backdrop. */
   getArtistArtwork?(trackId: string): Promise<string | null>;
 
+  /** Raw catalog resource (attributes + artist/album relationships) —
+   * dev exploration of everything Apple exposes per track. */
+  getRawMetadata?(trackId: string): Promise<unknown | null>;
+
   /** Load and play a track from a position (ms). */
   play(trackId: string, positionMs: number): Promise<void>;
   pause(): Promise<void>;
