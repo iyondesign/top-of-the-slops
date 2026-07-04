@@ -11,6 +11,36 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.3.0] — 2026-07-04 — "Broadcast Vinyl" design system
+
+### Added
+- **The TOTS design language** — fuses the contemporary dark music-app school
+  (Dribbble reference set: near-black canvas, single electric accent, oversized
+  display type, pill controls, artwork glow) with TOTS's MD-Vinyl/broadcast DNA.
+  Unique signature: the app is a TV station — ON AIR tally lamp, phosphor-green
+  mono telemetry (timecode, listener count, sync), TOTS•01 channel bug, 🔥/💩
+  two-tone vote duality. Rationale + full spec → `docs/DESIGN.md`
+- **Design-system preview bundle** in Claude Design (DesignSync) format — 8
+  self-contained rendered cards with `@dsCard` markers: colors, type,
+  geometry/motion foundations; vinyl hero, vote, chat, leaderboard, chrome
+  components. Ready to sync to a claude.ai/design project from any
+  design-authorized session. → `design-system/`
+- Motion + mono-font tokens (`motion`, `fonts`) in the theme.
+
+### Changed
+- `src/theme.ts` retuned to the Broadcast Vinyl palette (warm black `#0D0B09`,
+  gold `#F5A623`, ON AIR red `#FF3B30`, fire `#FF6B2C`, slop `#9D6BFF`, new
+  phosphor `#35E08A` for live telemetry).
+- Hero: LIVE pill → pulsing **ON AIR** lamp; listener pill → phosphor telemetry;
+  artwork glow behind the record; mono timecode + channel bug under the
+  progress bar; display-weight uppercase titles. Top bar gained the TOTS•01
+  bug; chat header meta now phosphor `LIVE CHAT`. → `src/components/`, `App.tsx`
+
+### Versioning
+- Manifests bumped to `0.3.0`.
+
+---
+
 ## [0.2.0] — 2026-07-04 — M2 Conductor · M3 Chat · M4 Voting & Leaderboards
 
 Commit `d5b8bd7`. Pushed the app through three milestones on both halves of the

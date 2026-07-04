@@ -1,0 +1,31 @@
+<!-- @dsCard group="Components" name="Vote pills & tally" -->
+<style>
+:root{--bg:#0D0B09;--raised:#17130F;--border:#2B241D;--text:#F6EFE3;--dim:#AFA28D;--faint:#6E6355;--fire:#FF6B2C;--slop:#9D6BFF;--mono:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:32px}
+h1{font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:20px}
+h2{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:24px 0 10px}
+.row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.v{display:flex;align-items:center;gap:7px;padding:9px 18px;border-radius:999px;border:1px solid;font-weight:800;font-size:15px}
+.vf{border-color:var(--fire);background:rgba(255,107,44,.12);color:var(--fire)}
+.vs{border-color:var(--slop);background:rgba(157,107,255,.12);color:var(--slop)}
+.voted-f{background:rgba(255,107,44,.32)}
+.voted-s{background:rgba(157,107,255,.32)}
+.dis{opacity:.35}
+.lbl{font-family:var(--mono);font-size:10px;color:var(--faint);width:110px}
+.tug{display:flex;width:160px;height:8px;border-radius:4px;overflow:hidden;background:var(--raised)}
+.tug i{display:block}
+.hint{font-size:10px;color:var(--faint);margin-top:16px}
+.ban{display:inline-flex;margin-top:16px;border:1px solid var(--slop);background:rgba(157,107,255,.16);color:var(--slop);font-weight:700;font-size:12px;padding:7px 16px;border-radius:999px}
+</style>
+<h1>Vote — one call per play</h1>
+<h2>States</h2>
+<div class="row"><span class="lbl">idle</span><div class="v vf">🔥 12</div><div class="v vs">💩 4</div></div>
+<div class="row" style="margin-top:10px"><span class="lbl">voted 🔥</span><div class="v vf voted-f">🔥 13</div><div class="v vs dis">💩 4</div></div>
+<div class="row" style="margin-top:10px"><span class="lbl">voted 💩</span><div class="v vf dis">🔥 12</div><div class="v vs voted-s">💩 5</div></div>
+<h2>Tug-of-war tally</h2>
+<div class="row"><span class="lbl">🔥 winning</span><div class="tug"><i style="flex:12;background:var(--fire)"></i><i style="flex:4;background:var(--slop)"></i></div></div>
+<div class="row" style="margin-top:10px"><span class="lbl">contested</span><div class="tug"><i style="flex:1;background:var(--fire)"></i><i style="flex:1;background:var(--slop)"></i></div></div>
+<div class="row" style="margin-top:10px"><span class="lbl">boo threshold</span><div class="tug"><i style="flex:3;background:var(--fire)"></i><i style="flex:11;background:var(--slop)"></i></div></div>
+<div class="ban">💩 “Midnight Static” was booed off the channel!</div>
+<div class="hint">Press = votePop spring (1→1.35→1). Voting locks for the rest of the play; the other pill dims to 35%.</div>

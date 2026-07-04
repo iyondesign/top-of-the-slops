@@ -2,17 +2,17 @@
   "expo": {
     "name": "Top of the Slops",
     "slug": "top-of-the-slops",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#12100e",
+    "backgroundColor": "#0D0B09",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#12100e",
+        "backgroundColor": "#0D0B09",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -21,7 +21,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "backgroundColor": "#12100e"
+      "backgroundColor": "#0D0B09"
     }
   }
 }

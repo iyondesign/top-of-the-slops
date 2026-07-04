@@ -1,0 +1,42 @@
+<!-- @dsCard group="Foundations" name="Geometry & motion" -->
+<style>
+:root{--bg:#0D0B09;--raised:#17130F;--sunken:#070605;--border:#2B241D;--text:#F6EFE3;--dim:#AFA28D;--faint:#6E6355;--gold:#F5A623;--onair:#FF3B30;--fire:#FF6B2C;--vinyl:#0A0908;--groove:#221C16;--mono:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:32px}
+h1{font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:0 0 20px}
+h2{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:28px 0 12px}
+.rads{display:flex;gap:16px;align-items:flex-end}
+.rad{background:var(--raised);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.sp{display:flex;gap:8px;align-items:flex-end;margin-top:8px}
+.sp div{background:var(--gold);width:18px;border-radius:3px 3px 0 0;opacity:.85}
+.splabel{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:6px}
+.motion{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.demo{display:flex;flex-direction:column;align-items:center;gap:8px}
+.demo span{font-family:var(--mono);font-size:10px;color:var(--faint)}
+.disc{width:72px;height:72px;border-radius:50%;background:radial-gradient(circle at center,var(--gold) 0 22%,var(--vinyl) 23% 100%);border:1px solid var(--groove);animation:rpm33 1.8s linear infinite;box-shadow:0 0 34px rgba(245,166,35,.3)}
+@keyframes rpm33{to{transform:rotate(360deg)}}
+.lamp{width:14px;height:14px;border-radius:50%;background:var(--onair);animation:pulse 2s ease-in-out infinite;box-shadow:0 0 16px rgba(255,59,48,.6)}
+@keyframes pulse{50%{opacity:.55}}
+.pop{width:56px;height:36px;border-radius:999px;border:1px solid var(--fire);background:rgba(255,107,44,.12);display:flex;align-items:center;justify-content:center;animation:votepop 1.6s cubic-bezier(.2,.8,.2,1) infinite}
+@keyframes votepop{0%,55%,100%{transform:scale(1)}70%{transform:scale(1.3)}}
+.card{margin-top:8px;background:var(--raised);border:1px solid var(--border);border-radius:24px;padding:16px;max-width:380px;box-shadow:inset 0 1px 0 rgba(246,239,227,.04)}
+.card p{font-size:12px;color:var(--dim);line-height:1.5}
+</style>
+<h1>Geometry &amp; motion</h1>
+<h2>Radii — pill 999 · card 24 · art 16 · tile 12</h2>
+<div class="rads">
+  <div class="rad" style="width:110px;height:40px;border-radius:999px">pill</div>
+  <div class="rad" style="width:90px;height:72px;border-radius:24px">card 24</div>
+  <div class="rad" style="width:72px;height:72px;border-radius:16px">art 16</div>
+  <div class="rad" style="width:56px;height:56px;border-radius:12px">tile 12</div>
+</div>
+<h2>Space scale</h2>
+<div class="sp"><div style="height:4px"></div><div style="height:8px"></div><div style="height:12px"></div><div style="height:16px"></div><div style="height:24px"></div><div style="height:32px"></div><div style="height:48px"></div></div>
+<div class="splabel">4 · 8 · 12 · 16 · 24 · 32 · 48</div>
+<h2>Motion tokens (live)</h2>
+<div class="motion">
+  <div class="demo"><div class="disc"></div><span>rpm33 · 1800ms linear ∞</span></div>
+  <div class="demo"><div class="lamp"></div><span>onAirPulse · 2s ∞</span></div>
+  <div class="demo"><div class="pop">🔥</div><span>votePop · spring 300ms</span></div>
+</div>
+<div class="card"><p><b style="color:var(--text)">The tactile lip:</b> every card = 1px border + 4% cream top-edge inner highlight (this card has it). Needle-drop (400ms cubic-bezier(.2,.8,.2,1)) enters new tracks; reduced-motion pauses the spin and turns springs into fades.</p></div>

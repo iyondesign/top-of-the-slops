@@ -18,7 +18,7 @@ import { VinylHero } from './src/components/VinylHero';
 import { useAppConfig, useChannelState, useCurrentTrack } from './src/hooks/useChannel';
 import { useIdentity } from './src/hooks/useIdentity';
 import { usePlayback } from './src/hooks/usePlayback';
-import { colors, DESKTOP_BREAKPOINT, space, type } from './src/theme';
+import { colors, DESKTOP_BREAKPOINT, fonts, radius, space, type } from './src/theme';
 
 export default function App() {
   const { width } = useWindowDimensions();
@@ -55,9 +55,14 @@ export default function App() {
     <SafeAreaView style={styles.root}>
       <StatusBar style="light" />
       <View style={styles.topBar}>
-        <Text style={styles.wordmark}>
-          TOP OF THE <Text style={styles.wordmarkAccent}>SLOPS</Text>
-        </Text>
+        <View style={styles.brand}>
+          <Text style={styles.wordmark}>
+            TOP OF THE <Text style={styles.wordmarkAccent}>SLOPS</Text>
+          </Text>
+          <View style={styles.channelBug}>
+            <Text style={styles.channelBugText}>TOTS•01</Text>
+          </View>
+        </View>
         {profile && <ProfileEditor profile={profile} onUpdate={update} />}
       </View>
 
@@ -97,6 +102,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     paddingVertical: space.md,
   },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   wordmark: {
     color: colors.text,
     fontSize: type.body,
@@ -104,6 +110,20 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   wordmarkAccent: { color: colors.accent },
+  channelBug: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.bgSunken,
+    borderRadius: radius.sm - 2,
+    paddingHorizontal: space.sm,
+    paddingVertical: 3,
+  },
+  channelBugText: {
+    color: colors.phosphor,
+    fontSize: type.micro,
+    fontFamily: fonts.mono,
+    letterSpacing: 2,
+  },
   desktopBody: {
     flex: 1,
     flexDirection: 'row',

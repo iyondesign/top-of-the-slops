@@ -1,0 +1,41 @@
+<!-- @dsCard group="Components" name="Leaderboards — Top Slops & Tastemakers" -->
+<style>
+:root{--bg:#0D0B09;--raised:#17130F;--sunken:#070605;--border:#2B241D;--text:#F6EFE3;--dim:#AFA28D;--faint:#6E6355;--gold:#F5A623;--gold-soft:rgba(245,166,35,.14);--fire:#FF6B2C;--slop:#9D6BFF;--mono:'SF Mono','JetBrains Mono',ui-monospace,Menlo,monospace}
+*{margin:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:32px;display:flex;gap:20px;flex-wrap:wrap}
+.panel{width:320px;background:var(--raised);border:1px solid var(--border);border-radius:24px;padding:16px;box-shadow:inset 0 1px 0 rgba(246,239,227,.04)}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tab{padding:6px 16px;border-radius:999px;background:var(--sunken);font-size:12px;font-weight:700;color:var(--faint)}
+.tab.on{background:var(--gold-soft);color:var(--gold)}
+.r{display:flex;align-items:center;gap:10px;padding:6px 6px;border-radius:12px}
+.r.you{background:var(--gold-soft)}
+.rank{font-family:var(--mono);font-size:11px;color:var(--faint);width:16px}
+.art{width:34px;height:34px;border-radius:8px}
+.b{flex:1;min-width:0}
+.t{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s{font-size:10px;color:var(--faint)}
+.net{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--fire);text-align:right}
+.net.neg{color:var(--slop)}
+.tal{font-family:var(--mono);font-size:9px;color:var(--faint);text-align:right}
+.score{font-family:var(--mono);font-size:15px;font-weight:800;color:var(--gold)}
+.av{font-size:18px}
+.cap{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:10px;letter-spacing:.06em}
+</style>
+<div>
+  <div class="panel">
+    <div class="tabs"><div class="tab on">Top Slops</div><div class="tab">Tastemakers</div></div>
+    <div class="r"><span class="rank">1</span><div class="art" style="background:conic-gradient(from 200deg,#F5A623,#FF6B2C,#17130F)"></div><div class="b"><div class="t">Banger Protocol</div><div class="s">VJAI &amp; The Countdown</div></div><div><div class="net">+12</div><div class="tal">🔥14 💩2</div></div></div>
+    <div class="r"><span class="rank">2</span><div class="art" style="background:conic-gradient(from 90deg,#9D6BFF,#17130F,#F5A623)"></div><div class="b"><div class="t">Certified Vinyl</div><div class="s">Tastemaker Court</div></div><div><div class="net">+5</div><div class="tal">🔥8 💩3</div></div></div>
+    <div class="r"><span class="rank">3</span><div class="art" style="background:conic-gradient(from 320deg,#FF6B2C,#070605,#9D6BFF)"></div><div class="b"><div class="t">Midnight Static 🚫</div><div class="s">The Slop Machines</div></div><div><div class="net neg">−7</div><div class="tal">🔥2 💩9</div></div></div>
+  </div>
+  <div class="cap">track board · net votes · 🚫 = booed off</div>
+</div>
+<div>
+  <div class="panel">
+    <div class="tabs"><div class="tab">Top Slops</div><div class="tab on">Tastemakers</div></div>
+    <div class="r you"><span class="rank">1</span><span class="av">🔥</span><div class="b"><div class="t" style="color:var(--gold)">cosmic-walkman-17 (you)</div><div class="s">called it early</div></div><div class="score">24</div></div>
+    <div class="r"><span class="rank">2</span><span class="av">🌈</span><div class="b"><div class="t">crispy-chorus-55</div><div class="s">called it early</div></div><div class="score">18</div></div>
+    <div class="r"><span class="rank">3</span><span class="av">🛸</span><div class="b"><div class="t">cosmic-fader-19</div><div class="s">called it early</div></div><div class="score">11</div></div>
+  </div>
+  <div class="cap">tastemaker board · early 🔥 on a riser = double credit</div>
+</div>

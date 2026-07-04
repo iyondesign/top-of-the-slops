@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 import { sendChatMessage, subscribeChat } from '../chat/chatClient';
-import { colors, radius, space, type } from '../theme';
+import { colors, fonts, radius, space, type } from '../theme';
 import type { AppConfig, ChatMessage, UserProfile } from '../types';
 
 interface Props {
@@ -65,7 +65,7 @@ export function ChatPanel({ profile, config }: Props) {
         <Text style={styles.title}>The Room</Text>
         <View style={styles.liveDotWrap}>
           <View style={styles.liveDot} />
-          <Text style={styles.headerMeta}>live chat</Text>
+          <Text style={styles.headerMeta}>LIVE CHAT</Text>
         </View>
       </View>
 
@@ -152,7 +152,12 @@ const styles = StyleSheet.create({
   title: { color: colors.text, fontSize: type.body, fontWeight: '700' },
   liveDotWrap: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.live },
-  headerMeta: { color: colors.textFaint, fontSize: type.micro },
+  headerMeta: {
+    color: colors.phosphor,
+    fontSize: type.micro,
+    fontFamily: fonts.mono,
+    letterSpacing: 1,
+  },
   messages: { flex: 1 },
   messageRow: { flexDirection: 'row', gap: space.sm, alignItems: 'flex-start' },
   messageAvatar: { fontSize: 16, marginTop: 1 },
