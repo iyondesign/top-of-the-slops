@@ -11,6 +11,34 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.7.0] — 2026-07-04 — The Room: one consolidated social panel
+
+Layout consolidation per the VyRT artist-view reference: a dominant artist
+stage with a single self-contained social column beside it.
+
+### Added
+- **`RoomPanel`** — Chat, Top Slops, and Tastemakers behind tabs in ONE
+  glass panel; **presence ("N IN THE ROOM" + live dot) lives in the panel
+  header**, tied to the room itself. → `src/components/RoomPanel.tsx`
+
+### Changed
+- Desktop layout: two rails → **hero + one Room rail (360px)**; hero grew
+  to 440–460px and the stage now dominates the viewport. Mobile: hero-first
+  with the Room below.
+- Hero badge row simplified to the ON AIR lamp only (listener pill moved
+  into the Room header).
+- Design system: `room-panel.html` card replaces the separate chat +
+  leaderboard cards; layout principle documented in `docs/DESIGN.md`.
+
+### Removed
+- `ChatPanel.tsx`, `LeaderboardPanel.tsx` (absorbed into `RoomPanel`);
+  `design-system/components/{chat,leaderboard}.html`.
+
+### Versioning
+- Manifests bumped to `0.7.0`.
+
+---
+
 ## [0.6.1] — 2026-07-04 — Header uses the real brand mark
 
 ### Changed

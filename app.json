@@ -2,7 +2,7 @@
   "expo": {
     "name": "Top of the Slops",
     "slug": "top-of-the-slops",
-    "version": "0.6.1",
+    "version": "0.7.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",

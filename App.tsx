@@ -17,11 +17,10 @@ import {
 
 import { attachPresence } from './src/channel/channelClient';
 import { AmbientBackdrop } from './src/components/AmbientBackdrop';
-import { ChatPanel } from './src/components/ChatPanel';
-import { LeaderboardPanel } from './src/components/LeaderboardPanel';
 import { Logo } from './src/components/Logo';
 import { OffAirCard } from './src/components/OffAirCard';
 import { ProfileEditor } from './src/components/ProfileEditor';
+import { RoomPanel } from './src/components/RoomPanel';
 import { VinylHero } from './src/components/VinylHero';
 import { useArtworkTint } from './src/hooks/useArtworkTint';
 import { useAppConfig, useChannelState, useCurrentTrack } from './src/hooks/useChannel';
@@ -49,7 +48,7 @@ export default function App() {
     if (profile && !profile.uid.startsWith('local-')) attachPresence(profile.uid);
   }, [profile?.uid]);
 
-  const heroSize = Math.min(isDesktop ? 360 : width - space.xl * 2, 400);
+  const heroSize = Math.min(isDesktop ? 440 : width - space.xl * 2, 460);
 
   const hero = !config.isLive ? (
     <OffAirCard size={heroSize} />
@@ -88,24 +87,16 @@ export default function App() {
 
       {isDesktop ? (
         <View style={styles.desktopBody}>
-          <View style={styles.rail}>
-            <ChatPanel profile={profile} config={config} />
-          </View>
           <View style={styles.heroColumn}>{hero}</View>
           <View style={styles.rail}>
-            <LeaderboardPanel profile={profile} />
+            <RoomPanel profile={profile} config={config} state={state} />
           </View>
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.mobileBody}>
           {hero}
-          <View style={styles.mobilePanels}>
-            <View style={styles.mobilePanel}>
-              <ChatPanel profile={profile} config={config} />
-            </View>
-            <View style={styles.mobilePanel}>
-              <LeaderboardPanel profile={profile} />
-            </View>
+          <View style={styles.mobilePanel}>
+            <RoomPanel profile={profile} config={config} state={state} />
           </View>
         </ScrollView>
       )}
@@ -146,15 +137,14 @@ const styles = StyleSheet.create({
     padding: space.lg,
     alignItems: 'stretch',
   },
-  rail: { flex: 1, maxWidth: 340 },
-  heroColumn: { flex: 2, alignItems: 'center', justifyContent: 'center' },
+  rail: { width: 360 },
+  heroColumn: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   mobileBody: {
     alignItems: 'center',
     padding: space.lg,
     gap: space.lg,
     paddingBottom: space.xl,
   },
-  mobilePanels: { width: '100%', gap: space.md },
-  mobilePanel: { height: 320 },
+  mobilePanel: { width: '100%', height: 440 },
   loading: { color: colors.textDim, fontSize: type.title },
 });

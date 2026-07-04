@@ -86,8 +86,11 @@ No all-caps display type — caps are reserved for telemetry.
 ### Geometry
 
 Radii: pills `999`, cards `24`, tiles `12`. Space: `4·8·12·16·24·32·48`.
-Cards: 1px `border` + 4% white top-edge inner highlight. Desktop = chat rail +
-hero + boards rail; <1024px hero-first stack.
+Cards: 1px `border` + 4% white top-edge inner highlight. Layout (VyRT
+lesson): the artist visual dominates — desktop = big hero + ONE Room rail
+(chat / Top Slops / Tastemakers behind tabs, presence in the panel header);
+<1024px hero-first with the Room below. One social surface, everything else
+is stage.
 
 ### Surfaces: ambient backdrop + frosted glass
 

@@ -75,18 +75,13 @@ export function VinylHero({ state, track, size, listeningEnabled, onTuneIn, prof
 
   return (
     <View style={styles.container}>
-      <View style={styles.badgeRow}>
-        <Pressable
-          onLongPress={() => devSetAppConfig({ isLive: false })}
-          style={styles.livePill}
-        >
-          <Animated.View style={[styles.liveDot, { opacity: lamp }]} />
-          <Text style={styles.liveText}>ON AIR</Text>
-        </Pressable>
-        <View style={styles.listenerPill}>
-          <Text style={styles.listenerText}>{state.listenerCount} IN THE ROOM</Text>
-        </View>
-      </View>
+      <Pressable
+        onLongPress={() => devSetAppConfig({ isLive: false })}
+        style={styles.livePill}
+      >
+        <Animated.View style={[styles.liveDot, { opacity: lamp }]} />
+        <Text style={styles.liveText}>ON AIR</Text>
+      </Pressable>
 
       <Animated.View
         style={{
@@ -205,7 +200,6 @@ function formatMs(ms: number): string {
 
 const styles = StyleSheet.create({
   container: { alignItems: 'center', gap: space.md },
-  badgeRow: { flexDirection: 'row', gap: space.sm, alignItems: 'center' },
   livePill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -224,20 +218,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     letterSpacing: 3,
     fontFamily: fonts.mono,
-  },
-  listenerPill: {
-    backgroundColor: colors.glassFill,
-    borderColor: colors.glassBorder,
-    borderWidth: 1,
-    paddingHorizontal: space.md,
-    paddingVertical: 6,
-    borderRadius: radius.full,
-  },
-  listenerText: {
-    color: colors.telemetry,
-    fontSize: 11,
-    fontFamily: fonts.mono,
-    letterSpacing: 1,
   },
   glow: {
     position: 'absolute',

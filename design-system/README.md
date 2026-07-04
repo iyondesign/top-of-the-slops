@@ -18,9 +18,10 @@ fully self-contained (inline CSS, no external requests) and starts with an
 | `foundations/geometry-motion.html` | Foundations | radii, spacing, live motion tokens |
 | `components/vinyl-hero.html` | Components | the Now Playing hero, assembled |
 | `components/vote.html` | Components | vote pill states, tally, boo banner |
-| `components/chat.html` | Components | The Room + kill-switch state |
-| `components/leaderboard.html` | Components | Top Slops + Tastemakers |
+| `components/room-panel.html` | Components | The Room — chat + boards tabs, presence in header |
 | `components/chrome.html` | Components | wordmark, buttons, pills, off-air |
+| `foundations/glass.html` | Foundations | frosted glass + ambient backdrop spec |
+| `brand/logo.html` | Brand | the mark, lockup, app icon, usage rules |
 
 ## Syncing to claude.ai/design
 
