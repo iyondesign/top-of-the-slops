@@ -47,31 +47,33 @@ When the Apple Developer account is approved:
 Then (next increment): import your Apple Music library/playlists into the
 candidate pool via the user token the sign-in grants.
 
-## 2. Google Cloud / Firebase (status: ⏳ needs project + web config)
+## 2. Google Cloud / Firebase (status: ✅ web config wired — console toggles remain)
 
-One Firebase project carries identity, the live channel, chat, and votes —
-and later the Gemini moderation + AI layer on the same Google Cloud project.
+Project **`top-of-the-slops`** exists and its web config ships as committed
+defaults in `src/firebase.ts`. Remaining console steps
+([console.firebase.google.com](https://console.firebase.google.com) →
+top-of-the-slops):
 
-1. [console.firebase.google.com](https://console.firebase.google.com) →
-   **Add project** (e.g. `top-of-the-slops`).
-2. **Build → Authentication → Sign-in method**: enable
-   - **Anonymous** (the instant-entry funnel),
-   - **Google** (works immediately),
-   - **Email/Password** (direct accounts),
-   - **Apple** (needs the Apple Developer account — add once approved).
-3. **Build → Realtime Database** → create (locked mode) → paste rules from
-   `firebase/database.rules.json`.
-4. **Build → Firestore** → create → paste rules from
-   `firebase/firestore.rules`.
-5. **Project settings → Your apps → Web app** → register → copy the config
-   object and fill `.env` (`EXPO_PUBLIC_FIREBASE_*` — see `.env.example`).
-6. Restart Expo. Identity switches to real Firebase Anonymous Auth; the
-   "Keep your cred" buttons in the profile sheet go live (Google + email
-   immediately; Apple after step 2's Apple provider).
-7. (Later, server): deploy `server/conductor/` to Cloud Run on the same
-   project — it uses the runtime service account, no key file.
+- [ ] **Build → Authentication → Sign-in method**: enable
+  - **Anonymous** (the instant-entry funnel — do this first),
+  - **Google** (works immediately),
+  - **Email/Password** (direct accounts),
+  - **Apple** (add once the Apple Developer account is approved).
+- [ ] **Build → Realtime Database** → create → paste rules from
+  `firebase/database.rules.json`. If the console shows a URL other than
+  `https://top-of-the-slops-default-rtdb.firebaseio.com`, set
+  `EXPO_PUBLIC_FIREBASE_DATABASE_URL` in `.env`.
+- [ ] **Build → Firestore** → create → paste rules from
+  `firebase/firestore.rules`.
 
-## What to hand over in chat
+With Anonymous enabled, identity runs on real Firebase Auth on next app
+start; "Keep your cred" (Google/email) works as soon as those providers are
+on. Every backend failure falls back to the local profile — the app never
+blocks on console state.
 
-Just the values from step 5 (the `EXPO_PUBLIC_FIREBASE_*` set) — or add
-them to `.env` yourself locally and tell me; either works. Nothing else.
+**Going fully live** (real shared room):
+- [ ] Deploy `server/conductor/` to Cloud Run on this project (its README
+  has the two gcloud commands; uses the runtime service account — no key
+  file).
+- [ ] Set `EXPO_PUBLIC_LIVE_CHANNEL=1` — flips the channel, chat, presence,
+  and votes from the stub to RTDB/Firestore.

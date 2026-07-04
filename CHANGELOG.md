@@ -11,6 +11,31 @@ half pending) · ⚪ not started.
 
 ---
 
+## [0.11.0] — 2026-07-04 — Wired to the real Firebase project
+
+### Changed
+- **`top-of-the-slops` Firebase web config committed as defaults** in
+  `src/firebase.ts` (client config is public by design; env vars still
+  override per-environment). Identity now attempts real Firebase Anonymous
+  Auth on every start.
+- **Two-stage activation:** identity/auth go live off console toggles
+  alone, but the live room (RTDB channel + Firestore chat + presence +
+  votes) is now gated behind `EXPO_PUBLIC_LIVE_CHANNEL=1` — flip it only
+  after the conductor is deployed, so the hero never hangs on a timeline
+  nothing writes. (`isLiveBackend()` replaces `isFirebaseConfigured()` for
+  transport selection.)
+- **Identity hardened**: Firebase auth or Firestore failures (provider not
+  yet enabled, network block, unprovisioned DB) fall back to the local
+  profile with a console warning — the app never blocks on backend state.
+  Verified: real config + blocked network → clean fallback, app fully live.
+- `docs/SETUP-TODO.md` updated to the remaining console checklist;
+  `.env.example` documents the committed defaults + live-channel flag.
+
+### Versioning
+- Manifests bumped to `0.11.0`.
+
+---
+
 ## [0.10.0] — 2026-07-04 — Progressive auth: iCloud / Google / email on Firebase
 
 ### Added

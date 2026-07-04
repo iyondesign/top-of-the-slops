@@ -1,13 +1,15 @@
 import type { ChatMessage, UserProfile } from '../types';
-import { isFirebaseConfigured } from '../firebase';
+import { isLiveBackend } from '../firebase';
 import { FirestoreChat } from './firestoreChat';
 import { StubChat } from './stubChat';
 
 /**
  * M3 chat, same swap-point pattern as the channel: Firestore transport
- * when Firebase is configured, ambient local stub otherwise. Client-side
- * rate limiting here; server-side rules + Gemini-assisted moderation are
- * the backend half (firestore.rules now, moderation function post-MVP).
+ * once the live backend is flipped on (EXPO_PUBLIC_LIVE_CHANNEL=1 —
+ * a live chat only makes sense when everyone shares the real conductor's
+ * timeline), ambient local stub otherwise. Client-side rate limiting
+ * here; server-side rules + Gemini-assisted moderation are the backend
+ * half (firestore.rules now, moderation function post-MVP).
  */
 
 export interface ChatTransport {
@@ -18,7 +20,7 @@ export interface ChatTransport {
 const RATE_LIMIT_MS = 2_000;
 const MAX_LENGTH = 280;
 
-const transport: ChatTransport = isFirebaseConfigured() ? new FirestoreChat() : new StubChat();
+const transport: ChatTransport = isLiveBackend() ? new FirestoreChat() : new StubChat();
 
 let lastSentAt = 0;
 

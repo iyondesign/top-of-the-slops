@@ -19,29 +19,60 @@ export async function loadOrCreateProfile(): Promise<UserProfile> {
   const stored = await readStoredProfile();
   const firebase = await getFirebase();
 
-  if (!firebase) {
-    if (stored) return stored;
-    const profile: UserProfile = {
-      uid: `local-${Math.random().toString(36).slice(2, 10)}`,
-      handle: randomHandle(),
-      avatar: randomAvatar(),
-      isAnonymous: true,
-      createdAt: Date.now(),
-    };
-    await persistLocal(profile);
-    return profile;
+  if (firebase) {
+    // Real Firebase Anonymous Auth — but NEVER let backend state (e.g.
+    // the Anonymous provider not yet enabled in the console, or a
+    // network block) dead-screen the app: fall back to a local profile.
+    try {
+      return await loadFirebaseProfile(firebase, stored);
+    } catch (err) {
+      console.warn('[tots] Firebase identity unavailable, using local profile', err);
+    }
   }
 
+  if (stored) return stored;
+  const profile: UserProfile = {
+    uid: `local-${Math.random().toString(36).slice(2, 10)}`,
+    handle: randomHandle(),
+    avatar: randomAvatar(),
+    isAnonymous: true,
+    createdAt: Date.now(),
+  };
+  await persistLocal(profile);
+  return profile;
+}
+
+async function loadFirebaseProfile(
+  firebase: NonNullable<Awaited<ReturnType<typeof getFirebase>>>,
+  stored: UserProfile | null,
+): Promise<UserProfile> {
   const { signInAnonymously } = await import('firebase/auth');
   const { doc, getDoc, setDoc, serverTimestamp } = await import('firebase/firestore');
 
   const cred = await signInAnonymously(firebase.auth);
   const uid = cred.user.uid;
   const userRef = doc(firebase.firestore, 'users', uid);
-  const snapshot = await getDoc(userRef);
+
+  // Firestore may not be provisioned yet — the auth uid alone is still a
+  // win (stable identity); profile data stays local until it is.
+  let snapshot: Awaited<ReturnType<typeof getDoc>> | null = null;
+  try {
+    snapshot = await getDoc(userRef);
+  } catch (err) {
+    console.warn('[tots] Firestore unavailable; keeping profile local', err);
+    const profile: UserProfile = {
+      uid,
+      handle: stored?.handle ?? randomHandle(),
+      avatar: stored?.avatar ?? randomAvatar(),
+      isAnonymous: true,
+      createdAt: stored?.createdAt ?? Date.now(),
+    };
+    await persistLocal(profile);
+    return profile;
+  }
 
   if (snapshot.exists()) {
-    const data = snapshot.data();
+    const data = snapshot.data() as any;
     const profile: UserProfile = {
       uid,
       handle: data.handle,

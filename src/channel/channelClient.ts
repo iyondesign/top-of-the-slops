@@ -1,15 +1,16 @@
 import type { AppConfig, ChannelState, Leaderboards, Track, VoteValue } from '../types';
-import { isFirebaseConfigured } from '../firebase';
+import { isLiveBackend } from '../firebase';
 import { FirebaseChannelTransport } from './firebaseChannel';
 import { stubChannel } from './stubChannel';
 import type { ChannelTransport } from './transport';
 
 /**
- * The client's single door to channel data. With Firebase configured
- * (EXPO_PUBLIC_FIREBASE_*), this is the live M2 transport — RTDB channel
- * state written by the Cloud Run conductor, real presence, Firestore
- * votes. Without it, the stub conductor keeps the app fully functional
- * offline. Same contract either way.
+ * The client's single door to channel data. With the live backend flag
+ * set (EXPO_PUBLIC_LIVE_CHANNEL=1, once the conductor is deployed and
+ * writing /channels/global/state), this is the M2 transport — RTDB
+ * channel state, real presence, Firestore votes. Otherwise the stub
+ * conductor keeps the app fully functional with zero backend. Same
+ * contract either way.
  */
 
 const stubTransport: ChannelTransport = {
@@ -27,7 +28,7 @@ const stubTransport: ChannelTransport = {
 };
 
 let transport: ChannelTransport;
-if (isFirebaseConfigured()) {
+if (isLiveBackend()) {
   transport = new FirebaseChannelTransport();
 } else {
   transport = stubTransport;
