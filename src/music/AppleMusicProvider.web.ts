@@ -90,6 +90,16 @@ export class AppleMusicProvider implements MusicProvider {
       throw new Error('MusicKit JS requires a browser environment');
     }
 
+    // Metro's web runtime defines a bare `process` global without
+    // `.versions`; MusicKit v3's environment sniff does
+    // `process.versions.node` and crashes mid-boot ("Cannot read
+    // properties of undefined (reading 'node')"). Give it the shape it
+    // expects before the script runs.
+    const proc = (window as any).process;
+    if (proc && typeof proc === 'object' && !proc.versions) {
+      proc.versions = {};
+    }
+
     // MusicKit v3 attaches `configure` AFTER its own async setup — the
     // script's onload fires too early, and the global can briefly exist
     // as a namespace without configure. The documented signal is the
